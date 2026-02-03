@@ -1,370 +1,523 @@
-<!DOCTYPE html>
-<html lang="zh-Hant" style="scroll-behavior: smooth;">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>森光工坊 - 找回您與生俱來的清晰視力</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Noto Sans TC', sans-serif;
-        }
-        /* 當導覽列滾動時增加背景 */
-        .scrolled {
-            background-color: rgba(255, 255, 255, 0.9) !important;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .hero-bg {
-            background-image: url('https://placehold.co/1920x1080/a0e9ff/333333?text=三個孩子在戶外奔跑的開心圖片');
-            background-size: cover;
-            background-position: center;
-        }
-    </style>
+<meta http-equiv=Content-Type content="text/html; charset=big5">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:�s�ө���;
+	panose-1:2 2 5 0 0 0 0 0 0 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+@font-face
+	{font-family:"Segoe UI Emoji";
+	panose-1:2 11 5 2 4 2 4 2 2 3;}
+@font-face
+	{font-family:"\@�s�ө���";
+	panose-1:2 1 6 1 0 1 1 1 1 1;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:8.0pt;
+	margin-left:0cm;
+	line-height:115%;
+	font-size:12.0pt;
+	font-family:"Calibri",sans-serif;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:115%;}
+ /* Page Definitions */
+ @page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;
+	layout-grid:18.0pt;}
+div.WordSection1
+	{page:WordSection1;}
+-->
+</style>
+
 </head>
-<body class="bg-gray-50">
 
-    <!-- Header / Navigation -->
-    <header id="navbar" class="bg-transparent fixed top-0 left-0 right-0 z-50 transition-all duration-300">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#" class="text-2xl font-bold text-gray-800">森光工坊</a>
-            <nav class="hidden md:flex space-x-8">
-                <a href="#about" class="text-gray-600 hover:text-amber-600 transition-colors">關於我們</a>
-                <a href="#method" class="text-gray-600 hover:text-amber-600 transition-colors">訓練方法</a>
-                <a href="#who" class="text-gray-600 hover:text-amber-600 transition-colors">適合對象</a>
-                <a href="#faq" class="text-gray-600 hover:text-amber-600 transition-colors">常見疑問</a>
-                <a href="#contact" class="text-gray-600 hover:text-amber-600 transition-colors">聯絡我們</a>
-            </nav>
-            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
-                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-            </button>
-        </div>
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white">
-            <a href="#about" class="block py-2 px-6 text-gray-600 hover:bg-amber-50">關於我們</a>
-            <a href="#method" class="block py-2 px-6 text-gray-600 hover:bg-amber-50">訓練方法</a>
-            <a href="#who" class="block py-2 px-6 text-gray-600 hover:bg-amber-50">適合對象</a>
-            <a href="#faq" class="block py-2 px-6 text-gray-600 hover:bg-amber-50">常見疑問</a>
-            <a href="#contact" class="block py-2 px-6 text-gray-600 hover:bg-amber-50">聯絡我們</a>
-        </div>
-    </header>
+<body lang=ZH-TW style='word-wrap:break-word;text-justify-trim:punctuation'>
 
-    <!-- Hero Section -->
-    <section class="hero-bg h-screen flex items-center justify-center">
-        <div class="bg-black bg-opacity-40 inset-0 absolute"></div>
-        <div class="text-center z-10 p-6">
-            <h1 class="text-4xl md:text-6xl font-bold text-white mb-4">找回您與生俱來的清晰視力</h1>
-            <p class="text-lg md:text-xl text-white mb-8 max-w-3xl mx-auto">在3C產品環繞的時代，森光工坊透過獨創的視力保健訓練，教您如何正確使用與放鬆雙眼，重拾明亮視野。</p>
-            <div class="space-x-4">
-                <a href="#contact" class="bg-amber-500 text-white font-bold py-3 px-8 rounded-full hover:bg-amber-600 transition-transform transform hover:scale-105">立即預約諮詢</a>
-                <a href="#about" class="bg-white text-amber-600 font-bold py-3 px-8 rounded-full hover:bg-amber-50 transition-transform transform hover:scale-105">了解更多</a>
-            </div>
-        </div>
-    </section>
+<div class=WordSection1 style='layout-grid:18.0pt'>
 
-    <main>
-        <!-- About Section -->
-        <section id="about" class="py-20">
-            <div class="container mx-auto px-6">
-                <div class="grid md:grid-cols-2 gap-12 items-center">
-                    <div class="rounded-lg overflow-hidden shadow-xl">
-                        <img src="https://placehold.co/600x400/81c7f5/ffffff?text=父親與女兒一起看平板" alt="守護孩子視力" class="w-full h-full object-cover">
-                    </div>
-                    <div>
-                        <h2 class="text-3xl font-bold text-gray-800 mb-4">守護孩子視力，從正確觀念開始</h2>
-                        <h3 class="text-xl font-semibold text-gray-700 mb-2">現代挑戰</h3>
-                        <p class="text-gray-600 mb-6">數位時代下，孩童平均每日使用3C產品時間超過6小時。長時間近距離用眼、缺乏戶外活動，使視力問題日益年輕化。家長的及早介入是守護孩子視力的關鍵。</p>
-                        <h3 class="text-xl font-semibold text-gray-700 mb-2">森光解方</h3>
-                        <p class="text-gray-600">我們深信每個孩子都擁有與生俱來的神奇眼睛。透過獨創且經過驗證的視力保健訓練課程，我們教導正確的用眼方法與深層放鬆技巧，引導孩子找回最自然的良好視力。</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+<p class=MsoNormal><span lang=EN-US>&lt;!DOCTYPE html&gt;</span></p>
 
-        <!-- Core Philosophy -->
-        <section class="bg-white py-20">
-            <div class="container mx-auto px-6 text-center">
-                <h2 class="text-3xl font-bold text-gray-800 mb-12">森光核心理念</h2>
-                <div class="grid md:grid-cols-4 gap-8">
-                    <div class="bg-gray-50 p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow">
-                        <div class="bg-amber-100 text-amber-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-2">天賦視力</h3>
-                        <p class="text-gray-600">每個人都擁有與生俱來的神奇眼睛，具備自然恢復與調節的能力。</p>
-                    </div>
-                    <div class="bg-gray-50 p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow">
-                        <div class="bg-amber-100 text-amber-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-2">專業關懷</h3>
-                        <p class="text-gray-600">結合醫學知識與實務經驗，提供溫暖且專業的視力保健指導服務。</p>
-                    </div>
-                    <div class="bg-gray-50 p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow">
-                        <div class="bg-amber-100 text-amber-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-2">正確方法</h3>
-                        <p class="text-gray-600">透過獨創訓練課程，教導正確使用與深層放鬆雙眼的有效技巧。</p>
-                    </div>
-                    <div class="bg-gray-50 p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow">
-                        <div class="bg-amber-100 text-amber-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                        </div>
-                        <h3 class="text-xl font-semibold mb-2">自然恢復</h3>
-                        <p class="text-gray-600">一步步引導學員找回原始的、最自然的良好視力，重拾明亮視野。</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+<p class=MsoNormal><span lang=EN-US>&lt;html lang=&quot;zh-TW&quot;&gt;</span></p>
 
-        <!-- Achievements -->
-        <section class="py-20 bg-green-700 text-white">
-            <div class="container mx-auto px-6 text-center">
-                 <h2 class="text-3xl font-bold mb-4">顯著的訓練成效</h2>
-                 <p class="max-w-3xl mx-auto mb-12">多年來，森光工坊已協助超過6,000位學員改善視力問題。</p>
-                 <div class="grid md:grid-cols-3 gap-8">
-                     <div class="bg-white bg-opacity-20 p-8 rounded-lg">
-                         <h3 class="text-5xl font-bold mb-2">6000+</h3>
-                         <p class="font-semibold">成功學員</p>
-                     </div>
-                      <div class="bg-white bg-opacity-20 p-8 rounded-lg">
-                         <h3 class="text-5xl font-bold mb-2">95%</h3>
-                         <p class="font-semibold">家長滿意度</p>
-                     </div>
-                      <div class="bg-white bg-opacity-20 p-8 rounded-lg">
-                         <h3 class="text-5xl font-bold mb-2">3個月</h3>
-                         <p class="font-semibold">平均見效週期</p>
-                     </div>
-                 </div>
-            </div>
-        </section>
+<p class=MsoNormal><span lang=EN-US>&lt;head&gt;</span></p>
 
-        <!-- Training Method -->
-        <section id="method" class="py-20 bg-white">
-            <div class="container mx-auto px-6">
-                <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">我們的訓練方法</h2>
-                <div class="relative">
-                    <!-- The connecting line -->
-                    <div class="hidden md:block absolute top-5 left-0 h-1 bg-green-200 w-full"></div>
-                    
-                    <div class="grid md:grid-cols-5 gap-8 relative">
-                        <div class="text-center">
-                            <div class="relative">
-                                <div class="w-10 h-10 mx-auto bg-amber-500 text-white rounded-full flex items-center justify-center z-10 relative">01</div>
-                            </div>
-                            <h3 class="font-semibold mt-4 mb-2">視力評估</h3>
-                            <p class="text-gray-600 text-sm">專業團隊進行完整的視力狀況分析，了解學員的獨特需求。</p>
-                        </div>
-                         <div class="text-center">
-                            <div class="relative">
-                                <div class="w-10 h-10 mx-auto bg-amber-500 text-white rounded-full flex items-center justify-center z-10 relative">02</div>
-                            </div>
-                            <h3 class="font-semibold mt-4 mb-2">客製化課程</h3>
-                            <p class="text-gray-600 text-sm">根據評估結果，設計專屬的訓練計畫。</p>
-                        </div>
-                         <div class="text-center">
-                           <div class="relative">
-                                <div class="w-10 h-10 mx-auto bg-amber-500 text-white rounded-full flex items-center justify-center z-10 relative">03</div>
-                            </div>
-                            <h3 class="font-semibold mt-4 mb-2">正確用眼指導</h3>
-                            <p class="text-gray-600 text-sm">教導正確的閱讀姿勢、用眼距離與時間管理。</p>
-                        </div>
-                         <div class="text-center">
-                           <div class="relative">
-                                <div class="w-10 h-10 mx-auto bg-amber-500 text-white rounded-full flex items-center justify-center z-10 relative">04</div>
-                            </div>
-                            <h3 class="font-semibold mt-4 mb-2">放鬆訓練技巧</h3>
-                            <p class="text-gray-600 text-sm">透過獨創的眼部放鬆運動與調節訓練，幫助眼睛恢復自然彈性。</p>
-                        </div>
-                         <div class="text-center">
-                            <div class="relative">
-                                <div class="w-10 h-10 mx-auto bg-amber-500 text-white rounded-full flex items-center justify-center z-10 relative">05</div>
-                            </div>
-                            <h3 class="font-semibold mt-4 mb-2">持續追蹤支持</h3>
-                            <p class="text-gray-600 text-sm">定期檢視訓練成效，適時調整課程內容。</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp; &lt;meta
+charset=&quot;UTF-8&quot;&gt;</span></p>
 
-        <!-- Who We Help -->
-        <section id="who" class="py-20">
-             <div class="container mx-auto px-6">
-                <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">適合的訓練對象</h2>
-                <div class="grid md:grid-cols-3 gap-8">
-                    <div class="border border-gray-200 rounded-lg p-8 text-center hover:shadow-lg transition-shadow">
-                        <img src="https://placehold.co/300x200/fca5a5/ffffff?text=學齡兒童" class="w-full h-40 object-cover rounded-md mb-6" alt="學齡兒童">
-                        <h3 class="text-xl font-semibold mb-2">學齡兒童 (6-12歲)</h3>
-                        <p class="text-gray-600">正值視力發展關鍵期，及早建立正確用眼習慣，預防近視加深。</p>
-                    </div>
-                     <div class="border border-gray-200 rounded-lg p-8 text-center hover:shadow-lg transition-shadow">
-                        <img src="https://placehold.co/300x200/fdba74/ffffff?text=青少年學生" class="w-full h-40 object-cover rounded-md mb-6" alt="青少年學生">
-                        <h3 class="text-xl font-semibold mb-2">青少年學生</h3>
-                        <p class="text-gray-600">課業壓力大、3C使用頻繁，透過訓練改善視力疲勞與度數控制。</p>
-                    </div>
-                     <div class="border border-gray-200 rounded-lg p-8 text-center hover:shadow-lg transition-shadow">
-                        <img src="https://placehold.co/300x200/86efac/ffffff?text=年輕成人" class="w-full h-40 object-cover rounded-md mb-6" alt="年輕成人">
-                        <h3 class="text-xl font-semibold mb-2">年輕成人</h3>
-                        <p class="text-gray-600">長時間使用電腦工作或學習的年輕族群，學習護眼技巧維持視力健康。</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp; &lt;meta
+name=&quot;viewport&quot; content=&quot;width=device-width,
+initial-scale=1.0&quot;&gt;</span></p>
 
-        <!-- FAQ -->
-        <section id="faq" class="py-20 bg-white">
-            <div class="container mx-auto px-6 max-w-4xl">
-                 <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">家長常見疑問</h2>
-                 <div class="space-y-4">
-                     <div class="faq-item bg-gray-50 rounded-lg shadow-sm">
-                         <button class="faq-question w-full text-left p-6 flex justify-between items-center">
-                             <span class="font-semibold text-lg text-gray-800">訓練需要多久才能看到效果？</span>
-                             <svg class="w-6 h-6 transform transition-transform text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                         </button>
-                         <div class="faq-answer hidden p-6 pt-0 text-gray-600">
-                             多數學員在持續訓練2-3個月後可感受明顯進步。關鍵在於配合度與練習頻率。
-                         </div>
-                     </div>
-                     <div class="faq-item bg-gray-50 rounded-lg shadow-sm">
-                         <button class="faq-question w-full text-left p-6 flex justify-between items-center">
-                             <span class="font-semibold text-lg text-gray-800">訓練過程會不會很辛苦？</span>
-                             <svg class="w-6 h-6 transform transition-transform text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                         </button>
-                         <div class="faq-answer hidden p-6 pt-0 text-gray-600">
-                             我們的訓練方法溫和且循序漸進，課程設計融入趣味元素，讓孩子在輕鬆愉快的氛圍中學習。
-                         </div>
-                     </div>
-                      <div class="faq-item bg-gray-50 rounded-lg shadow-sm">
-                         <button class="faq-question w-full text-left p-6 flex justify-between items-center">
-                             <span class="font-semibold text-lg text-gray-800">已經配戴眼鏡還能訓練嗎？</span>
-                             <svg class="w-6 h-6 transform transition-transform text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                         </button>
-                         <div class="faq-answer hidden p-6 pt-0 text-gray-600">
-                             當然可以。透過正確的訓練方法，可以幫助控制度數加深，部分學員甚至能逐步降低對眼鏡的依賴。
-                         </div>
-                     </div>
-                      <div class="faq-item bg-gray-50 rounded-lg shadow-sm">
-                         <button class="faq-question w-full text-left p-6 flex justify-between items-center">
-                             <span class="font-semibold text-lg text-gray-800">訓練結束後效果能持續嗎？</span>
-                             <svg class="w-6 h-6 transform transition-transform text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                         </button>
-                         <div class="faq-answer hidden p-6 pt-0 text-gray-600">
-                             訓練的核心是教導終身受用的正確用眼習慣與放鬆技巧。我們也提供後續追蹤服務，確保學員能將所學應用於日常生活中。
-                         </div>
-                     </div>
-                 </div>
-            </div>
-        </section>
-        
-        <!-- Contact Section -->
-        <section id="contact" class="py-20">
-            <div class="container mx-auto px-6">
-                 <h2 class="text-3xl font-bold text-center text-gray-800 mb-12">開始您的視力保健之旅</h2>
-                 <div class="grid md:grid-cols-2 gap-12 bg-white p-8 rounded-xl shadow-lg">
-                    <div>
-                        <h3 class="text-2xl font-semibold mb-6">聯絡資訊</h3>
-                        <div class="space-y-4 text-gray-700">
-                           <p><strong>地址:</strong> 台中市北區館前路19號7樓之一</p>
-                           <p><strong>電話:</strong> <a href="tel:0978366016" class="text-amber-600 hover:underline">0978-366-016</a></p>
-                           <p><strong>電子郵件:</strong> <a href="mailto:swl8310@hk.edu.tw" class="text-amber-600 hover:underline">swl8310@hk.edu.tw</a></p>
-                           <p><strong>服務時間:</strong><br>週一至週五 09:00-18:00<br>週六 09:00-17:00<br>(週日及國定假日休息)</p>
-                        </div>
-                         <a href="tel:0978366016" class="mt-8 inline-block bg-amber-500 text-white font-bold py-3 px-8 rounded-full hover:bg-amber-600 transition-transform transform hover:scale-105">立即致電預約</a>
-                    </div>
-                    <div class="h-80 md:h-full rounded-lg overflow-hidden">
-                        <iframe 
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3640.751163358434!2d120.67201867595305!3d24.14498317840333!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x34693d0b16f3c09b%3A0xc33a1e1d871b5695!2zNDA05Y-w5Lit5biC5YyX5Y2A6IKh5YmN6LevMTnomZ835qiSLTE!5e0!3m2!1szh-TW!2stw!4v1730419992383!5m2!1szh-TW!2stw" 
-                            width="100%" 
-                            height="100%" 
-                            style="border:0;" 
-                            allowfullscreen="" 
-                            loading="lazy">
-                        </iframe>
-                    </div>
-                 </div>
-            </div>
-        </section>
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp; &lt;title&gt;</span><span
+style='font-family:"�s�ө���",serif'>�L�u���a���I�~Ų���</span><span lang=EN-US>&lt;/title&gt;</span></p>
 
-    </main>
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp; &lt;style&gt;</span></p>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-12">
-        <div class="container mx-auto px-6 text-center">
-            <h3 class="text-2xl font-bold mb-2">給孩子一個明亮的未來</h3>
-            <p class="mb-6">森光工坊致力於透過專業、溫暖且有效的訓練方法，幫助每一位孩子找回清晰視野。</p>
-            <div class="mb-6">
-                <a href="#about" class="px-3 hover:text-amber-300">關於我們</a>|
-                <a href="#method" class="px-3 hover:text-amber-300">訓練方法</a>|
-                <a href="#who" class="px-3 hover:text-amber-300">適合對象</a>|
-                <a href="#faq" class="px-3 hover:text-amber-300">常見疑問</a>|
-                <a href="#contact" class="px-3 hover:text-amber-300">聯絡我們</a>
-            </div>
-            <p class="text-gray-400 text-sm">&copy; <span id="year"></span> 森光工坊. All Rights Reserved.</p>
-        </div>
-    </footer>
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+:root {</span></p>
 
-    <script>
-        // Navbar scroll effect
-        window.addEventListener('scroll', function() {
-            const navbar = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
-        });
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+--primary-color: #2E8B57; /* </span><span style='font-family:"�s�ө���",serif'>���v��</span><span
+lang=EN-US> */</span></p>
 
-        // Mobile menu toggle
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        mobileMenuButton.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-        
-        // Close mobile menu on link click
-        document.querySelectorAll('#mobile-menu a').forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.add('hidden');
-            });
-        });
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+--accent-color: #FF7F50; /* </span><span style='font-family:"�s�ө���",serif'>�����</span><span
+lang=EN-US> */</span></p>
 
-        // FAQ Accordion
-        const faqItems = document.querySelectorAll('.faq-item');
-        faqItems.forEach(item => {
-            const question = item.querySelector('.faq-question');
-            const answer = item.querySelector('.faq-answer');
-            const icon = question.querySelector('svg');
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+--bg-color: #F0FFF0; /* </span><span style='font-family:"�s�ө���",serif'>�e�ʺ�L��</span><span
+lang=EN-US> */</span></p>
 
-            question.addEventListener('click', () => {
-                const isHidden = answer.classList.contains('hidden');
-                
-                // Close all other answers
-                document.querySelectorAll('.faq-answer').forEach(ans => {
-                    if (ans !== answer) {
-                        ans.classList.add('hidden');
-                    }
-                });
-                document.querySelectorAll('.faq-question svg').forEach(ic => {
-                    if (ic !== icon) {
-                        ic.classList.remove('rotate-180');
-                    }
-                });
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+--text-color: #333;</span></p>
 
-                // Toggle current answer
-                answer.classList.toggle('hidden');
-                icon.classList.toggle('rotate-180');
-            });
-        });
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+--paper-color: #ffffff;</span></p>
 
-        // Set current year in footer
-        document.getElementById('year').textContent = new Date().getFullYear();
-    </script>
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+body {</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+background-color: var(--bg-color);</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+background-image: linear-gradient(135deg, #F0FFF0 0%, #E0FFFF 100%);</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+color: var(--text-color);</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+margin: 0;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+padding: 20px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+display: flex;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+justify-content: center;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+align-items: center;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+min-height: 100vh;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.menu-container {</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+background-color: var(--paper-color);</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+width: 100%;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+max-width: 600px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+padding: 40px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+box-shadow: 0 10px 25px rgba(0,0,0,0.1);</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+border-radius: 15px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+text-align: center;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+border: 2px solid var(--primary-color);</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+position: relative;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+overflow: hidden;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+/* </span><span style='font-family:"�s�ө���",serif'>�˹��ʼ��a����</span><span
+lang=EN-US> (CSS</span><span style='font-family:"�s�ө���",serif'>����</span><span
+lang=EN-US>) */</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.menu-container::before {</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+content: &quot;</span><span lang=EN-US style='font-family:"Segoe UI Emoji",sans-serif'>&#127807;</span><span
+lang=EN-US>&quot;;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+position: absolute;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+top: -10px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+left: -10px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+font-size: 80px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+opacity: 0.2;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.menu-container::after {</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+content: &quot;</span><span lang=EN-US style='font-family:"Segoe UI Emoji",sans-serif'>&#127802;</span><span
+lang=EN-US>&quot;;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+position: absolute;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+bottom: -10px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+right: -10px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+font-size: 80px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+opacity: 0.2;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+h1 {</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+color: var(--primary-color);</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+font-size: 2.2em;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+margin-bottom: 10px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+letter-spacing: 2px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+text-transform: uppercase;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.subtitle {</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+color: var(--accent-color);</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+font-size: 1.2em;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+margin-bottom: 40px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+font-weight: 300;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+font-style: italic;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.course {</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+margin-bottom: 35px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+border-bottom: 1px dashed #ddd;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+padding-bottom: 20px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.course:last-child {</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+border-bottom: none;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.course-title {</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+font-size: 0.9em;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+color: #888;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+text-transform: uppercase;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+letter-spacing: 1.5px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+margin-bottom: 5px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.dish-name {</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+font-size: 1.4em;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+color: var(--text-color);</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+margin: 5px 0;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+font-weight: bold;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.dish-desc {</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+font-size: 0.95em;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+color: #666;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+line-height: 1.6;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+margin-top: 5px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+.highlight {</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+color: var(--accent-color);</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+font-weight: bold;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+footer {</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+margin-top: 30px;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+font-size: 0.8em;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+color: #999;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+}</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp; &lt;/style&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&lt;/head&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&lt;body&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp; &lt;div
+class=&quot;menu-container&quot;&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;h1&gt;Summer Tropical&lt;/h1&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;div class=&quot;subtitle&quot;&gt;Dessert Tasting Menu&lt;/div&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;div class=&quot;course&quot;&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;div class=&quot;course-title&quot;&gt;01. Pre-dessert&lt;/div&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;h2 class=&quot;dish-name&quot;&gt;</span><span style='font-family:"�s�ө���",serif'>�ʭ��Gù�ǦB��</span><span
+lang=EN-US>&lt;/h2&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;div class=&quot;dish-desc&quot;&gt;Passion Breeze&lt;/div&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;p class=&quot;dish-desc&quot;&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span style='font-family:"�s�ө���",serif'>���īצʭ��G�B�F���H�M�s</span><span
+lang=EN-US>&lt;span class=&quot;highlight&quot;&gt;</span><span
+style='font-family:"�s�ө���",serif'>ù��</span><span lang=EN-US>&lt;/span&gt;</span><span
+style='font-family:"�s�ө���",serif'>�A�I��ܩi�֡A���P�M�n���}���C</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/p&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/div&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;div class=&quot;course&quot;&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;div class=&quot;course-title&quot;&gt;02. Main Dessert&lt;/div&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;h2 class=&quot;dish-name&quot;&gt;</span><span style='font-family:"�s�ө���",serif'>��K�L�]�۷Q��</span><span
+lang=EN-US>&lt;/h2&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;div class=&quot;dish-desc&quot;&gt;Lychee &amp; Coconut Fantasy&lt;/div&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;p class=&quot;dish-desc&quot;&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;span class=&quot;highlight&quot;&gt;</span><span style='font-family:"�s�ө���",serif'>��K</span><span
+lang=EN-US>&lt;/span&gt;</span><span style='font-family:"�s�ө���",serif'>�ե��J�O�}���A�]�q�Ь֤l���`�A�f�t�����F�J�˯��P�����H�ѭ�C</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/p&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/div&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;div class=&quot;course&quot;&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;div class=&quot;course-title&quot;&gt;03. Petit Fours&lt;/div&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;h2 class=&quot;dish-name&quot;&gt;</span><span style='font-family:"�s�ө���",serif'>���a�L��</span><span
+lang=EN-US>&lt;/h2&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;div class=&quot;dish-desc&quot;&gt;Tropical Glimmer&lt;/div&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;p class=&quot;dish-desc&quot;&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span style='font-family:"�s�ө���",serif'>�g�A�~�G��</span><span lang=EN-US>
+&amp; </span><span style='font-family:"�s�ө���",serif'>���i�s�����Q�S���J�O�A�A�X�f�t�©@�ت������y�I�C</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/p&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/div&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;footer&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Designed for Summer 2026</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;/footer&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;&nbsp;&nbsp; &lt;/div&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&lt;/body&gt;</span></p>
+
+<p class=MsoNormal><span lang=EN-US>&lt;/html&gt;</span></p>
+
+</div>
 
 </body>
-</html>
 
+</html>
