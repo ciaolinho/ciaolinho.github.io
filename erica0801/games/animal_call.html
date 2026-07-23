@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幼兒園快樂森林大冒險</title>
+    <style>
+        :root {
+            --primary-color: #ffeb3b;
+            --secondary-color: #4caf50;
+            --stop-color: #ff5252;
+            --bg-color: #e3f2fd;
+            --font-main: 'Microsoft JhengHei', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            user-select: none;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 500px;
+            height: 90vh;
+            background: white;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 30px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 頂部資訊欄 */
+        #top-bar {
+            padding: 15px 20px;
+            background: var(--secondary-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            font-weight: bold;
+            z-index: 10;
+        }
+
+        .screen {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .screen.active { display: flex; }
+
+        /* 按鈕樣式 */
+        .btn {
+            background: var(--primary-color);
+            border: 4px solid #fbc02d;
+            border-radius: 50px;
+            padding: 15px 40px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 5px 0 #fbc02d;
+            transition: 0.1s;
+        }
+
+        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #fbc02d; }
+
+        /* 停止按鈕 - 醒目紅色 */
+        .btn-stop {
+            background: var(--stop-color);
+            border-color: #d32f2f;
+            color: white;
+            box-shadow: 0 5px 0 #d32f2f;
+            padding: 10px 30px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+        }
+
+        .btn-stop:active { box-shadow: 0 2px 0 #d32f2f; }
+
+        /* 遊戲元素 */
+        .animal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            width: 100%;
+        }
+
+        .animal-card {
+            background: #f1f8e9;
+            border: 3px solid #a5d6a7;
+            border-radius: 20px;
+            font-size: 3.5rem;
+            padding: 15px;
+            cursor: pointer;
+        }
+
+        #bubble-stage {
+            width: 100%;
+            height: 100%;
+            background: #81d4fa;
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+        }
+
+        .bubble {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.5);
+            border: 2px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            animation: floatUp 4s linear forwards;
+        }
+
+        @keyframes floatUp {
+            from { transform: translateY(500px); }
+            to { transform: translateY(-100px); }
+        }
+
+        /* 結算彈窗 */
+        #result-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="top-bar">
+        <span>⏱️ <span id="timer">00:00</span></span>
+        <span>⭐ 星星: <span id="score">0</span></span>
+    </div>
+
+    <div id="screen-menu" class="screen active">
+        <h1 style="color: #2e7d32; font-size: 2rem;">🌳 森林大冒險</h1>
+        <button class="btn" onclick="startGame('match')">🦁 動物點點名</button>
+        <button class="btn" onclick="startGame('bubbles')">🫧 彩色泡泡彈</button>
+    </div>
+
+    <div id="screen-match" class="screen">
+        <div id="voice-hint" style="font-size: 2rem; margin-bottom: 20px;">🔊 載入中...</div>
+        <div class="animal-grid" id="match-options"></div>
+        <button class="btn btn-stop" onclick="stopGame()">🛑 停止遊戲</button>
+    </div>
+
+    <div id="screen-bubbles" class="screen">
+        <div id="bubble-stage"></div>
+        <button class="btn btn-stop" onclick="stopGame()">🛑 停止遊戲</button>
+    </div>
+
+    <div id="result-overlay">
+        <h2 style="font-size: 2.5rem;">太棒了！👏</h2>
+        <p id="final-stat" style="font-size: 1.5rem;"></p>
+        <button class="btn" onclick="closeResult()">回首頁</button>
+    </div>
+</div>
+
+<script>
+    let score = 0;
+    let seconds = 0;
+    let gameInterval, timerInterval, bubbleGenInterval;
+    const animals = [
+        { i: '🐶', s: '汪汪！' }, { i: '🐱', s: '喵喵～' },
+        { i: '🦁', s: '吼～吼～' }, { i: '🐥', s: '嘰嘰！' },
+        { i: '🐸', s: '呱呱！' }, { i: '🐘', s: '叭～！' }
+    ];
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-' + id).classList.add('active');
+    }
+
+    // 計時器邏輯
+    function startTimer() {
+        seconds = 0;
+        document.getElementById('timer').innerText = "00:00";
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            seconds++;
+            let m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            let s = (seconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer').innerText = `${m}:${s}`;
+        }, 1000);
+    }
+
+    function startGame(mode) {
+        score = 0;
+        document.getElementById('score').innerText = score;
+        startTimer();
+        showScreen(mode);
+
+        if (mode === 'match') initMatch();
+        else if (mode === 'bubbles') initBubbles();
+    }
+
+    // 停止遊戲
+    function stopGame() {
+        clearInterval(timerInterval);
+        clearInterval(bubbleGenInterval);
+        const timeStr = document.getElementById('timer').innerText;
+        document.getElementById('final-stat').innerHTML = `你獲得了 ${score} 顆星星<br>一共玩了 ${timeStr}`;
+        document.getElementById('result-overlay').style.display = 'flex';
+    }
+
+    function closeResult() {
+        document.getElementById('result-overlay').style.display = 'none';
+        showScreen('menu');
+    }
+
+    // --- 遊戲邏輯：動物配對 ---
+    function initMatch() {
+        const container = document.getElementById('match-options');
+        container.innerHTML = '';
+        const shuffled = [...animals].sort(() => 0.5 - Math.random()).slice(0, 4);
+        const target = shuffled[Math.floor(Math.random() * 4)];
+        document.getElementById('voice-hint').innerText = `找找誰在「${target.s}」`;
+
+        shuffled.forEach(a => {
+            const div = document.createElement('div');
+            div.className = 'animal-card';
+            div.innerText = a.i;
+            div.onclick = () => {
+                if (a.i === target.i) {
+                    score += 10;
+                    document.getElementById('score').innerText = score;
+                    initMatch();
+                } else {
+                    div.style.background = '#ffcdd2';
+                    setTimeout(() => div.style.background = '#f1f8e9', 300);
+                }
+            };
+            container.appendChild(div);
+        });
+    }
+
+    // --- 遊戲邏輯：泡泡彈 ---
+    function initBubbles() {
+        const stage = document.getElementById('bubble-stage');
+        stage.innerHTML = '';
+        bubbleGenInterval = setInterval(() => {
+            const b = document.createElement('div');
+            b.className = 'bubble';
+            b.innerText = ['🍎', '🍭', '⭐', '🎈'][Math.floor(Math.random() * 4)];
+            b.style.left = Math.random() * 80 + '%';
+            b.onclick = () => {
+                score += 5;
+                document.getElementById('score').innerText = score;
+                b.remove();
+            };
+            stage.appendChild(b);
+            setTimeout(() => b.remove(), 4000);
+        }, 1000);
+    }
+</script>
+
+</body>
+</html>

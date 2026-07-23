@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剪刀石頭布</title>
+    <style>
+        /* 全域重置與基礎設定 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* 針對內嵌環境隱藏外部捲軸 */
+            overflow: hidden; 
+        }
+
+        /* 遊戲主要容器 */
+        .game-container {
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            padding: 30px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        h1 {
+            color: #1f2937;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        /* 計分板 */
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f9fafb;
+            padding: 15px 20px;
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .score-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .score-label {
+            font-size: 14px;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .score-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        /* 戰況顯示區 */
+        .battle-arena {
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            background-color: #eff6ff;
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .choice-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80px;
+        }
+
+        .choice-display .who {
+            font-size: 12px;
+            color: #4b5563;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .choice-display .emoji {
+            font-size: 48px;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .vs-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        /* 結果訊息 */
+        .result-message {
+            font-size: 20px;
+            font-weight: bold;
+            color: #111827;
+            height: 30px; /* 固定高度避免跳動 */
+        }
+
+        .win { color: #10b981; }
+        .lose { color: #ef4444; }
+        .tie { color: #f59e0b; }
+
+        /* 操作按鈕區 */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .play-btn {
+            background-color: #ffffff;
+            border: 2px solid #d1d5db;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            font-size: 32px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .play-btn:hover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .play-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 重新開始按鈕 */
+        .reset-btn {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .reset-btn:hover {
+            background-color: #dc2626;
+        }
+
+        /* 動畫效果 */
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* 預設提示狀態 */
+        .initial-prompt {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>剪刀石頭布 ✌️✊🖐️</h1>
+        
+        <!-- 計分板 -->
+        <div class="scoreboard">
+            <div class="score-box">
+                <span class="score-label">玩家</span>
+                <span class="score-number" id="player-score">0</span>
+            </div>
+            <div class="score-box">
+                <span class="score-label">電腦</span>
+                <span class="score-number" id="computer-score">0</span>
+            </div>
+        </div>
+
+        <!-- 結果訊息 -->
+        <div class="result-message" id="result-text">準備開始！</div>
+
+        <!-- 戰況顯示區 -->
+        <div class="battle-arena" id="battle-arena">
+            <div class="initial-prompt">請點擊下方按鈕出拳</div>
+        </div>
+
+        <!-- 玩家控制區 -->
+        <div class="controls">
+            <button class="play-btn" onclick="playGame('scissors')" title="剪刀">✌️</button>
+            <button class="play-btn" onclick="playGame('rock')" title="石頭">✊</button>
+            <button class="play-btn" onclick="playGame('paper')" title="布">🖐️</button>
+        </div>
+
+        <!-- 重設按鈕 -->
+        <button class="reset-btn" onclick="resetGame()">重新開始遊戲</button>
+    </div>
+
+    <script>
+        // 遊戲狀態變數
+        let playerScore = 0;
+        let computerScore = 0;
+
+        // 選擇對應的 Emoji
+        const emojis = {
+            'scissors': '✌️',
+            'rock': '✊',
+            'paper': '🖐️'
+        };
+
+        // DOM 元素取得
+        const playerScoreEl = document.getElementById('player-score');
+        const computerScoreEl = document.getElementById('computer-score');
+        const resultTextEl = document.getElementById('result-text');
+        const battleArenaEl = document.getElementById('battle-arena');
+
+        // 主要遊戲邏輯
+        function playGame(playerChoice) {
+            const choices = ['scissors', 'rock', 'paper'];
+            const computerChoice = choices[Math.floor(Math.random() * choices.length)];
+            
+            // 判斷勝負
+            let result = '';
+            let resultClass = '';
+
+            if (playerChoice === computerChoice) {
+                result = '平手！🤝';
+                resultClass = 'tie';
+            } else if (
+                (playerChoice === 'scissors' && computerChoice === 'paper') ||
+                (playerChoice === 'rock' && computerChoice === 'scissors') ||
+                (playerChoice === 'paper' && computerChoice === 'rock')
+            ) {
+                result = '你贏了！🎉';
+                resultClass = 'win';
+                playerScore++;
+            } else {
+                result = '你輸了！😢';
+                resultClass = 'lose';
+                computerScore++;
+            }
+
+            // 更新計分板
+            playerScoreEl.textContent = playerScore;
+            computerScoreEl.textContent = computerScore;
+
+            // 更新結果文字與顏色
+            resultTextEl.textContent = result;
+            resultTextEl.className = 'result-message ' + resultClass;
+
+            // 更新戰況顯示區 (帶入重新渲染的動畫)
+            battleArenaEl.innerHTML = `
+                <div class="choice-display">
+                    <span class="who">你</span>
+                    <span class="emoji">${emojis[playerChoice]}</span>
+                </div>
+                <div class="vs-text">VS</div>
+                <div class="choice-display">
+                    <span class="who">電腦</span>
+                    <span class="emoji">${emojis[computerChoice]}</span>
+                </div>
+            `;
+        }
+
+        // 重設遊戲邏輯
+        function resetGame() {
+            playerScore = 0;
+            computerScore = 0;
+            
+            playerScoreEl.textContent = playerScore;
+            computerScoreEl.textContent = computerScore;
+            
+            resultTextEl.textContent = '準備開始！';
+            resultTextEl.className = 'result-message';
+            
+            battleArenaEl.innerHTML = '<div class="initial-prompt">請點擊下方按鈕出拳</div>';
+        }
+    </script>
+</body>
+</html>

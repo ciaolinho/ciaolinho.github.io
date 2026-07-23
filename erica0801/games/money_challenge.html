@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小主人理財大挑戰</title>
+    <style>
+        :root {
+            --primary-color: #ff9a9e;
+            --secondary-color: #fad0c4;
+            --coin-color: #ffd700;
+            --text-color: #5d5d5d;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', sans-serif;
+            background-color: #f0f9ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+
+        #game-container {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 20px;
+            text-align: center;
+            border: 5px solid var(--secondary-color);
+        }
+
+        .header {
+            background: var(--secondary-color);
+            padding: 10px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .balance-box {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .coin-icon {
+            color: var(--coin-color);
+            font-size: 28px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+
+        h2 { color: #ff6f61; font-size: 22px; }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 0 #e67e83;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .item-card {
+            border: 2px solid #eee;
+            padding: 10px;
+            border-radius: 15px;
+            background: #fff;
+        }
+
+        .item-emoji { font-size: 40px; }
+        .price { font-weight: bold; color: #e67e83; }
+
+        .message {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #4a90e2;
+            min-height: 24px;
+        }
+
+        /* 動畫效果 */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .coin-animation {
+            animation: bounce 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="header">
+        <div class="balance-box">
+            我的儲蓄罐: <span class="coin-icon">💰</span> <span id="balance">0</span>
+        </div>
+    </div>
+
+    <div id="home-screen" class="screen active">
+        <h2>👋 你好，小小主人！</h2>
+        <p>今天想要做什麼呢？</p>
+        <button class="btn" onclick="showScreen('work-screen')">🧹 幫忙做家事</button>
+        <button class="btn" onclick="showScreen('shop-screen')">🎁 去商店看看</button>
+    </div>
+
+    <div id="work-screen" class="screen">
+        <h2>🧹 動手做家事</h2>
+        <p>點擊按鈕來幫忙，可以賺到小獎勵喔！</p>
+        <div style="font-size: 60px; margin: 20px;">🏠</div>
+        <button class="btn" onclick="earnMoney()">收拾玩具 (+1)</button>
+        <button class="btn" onclick="earnMoney()">幫忙擦桌子 (+1)</button>
+        <br>
+        <button class="btn" style="background: #ccc; box-shadow: 0 4px 0 #999;" onclick="showScreen('home-screen')">返回</button>
+    </div>
+
+    <div id="shop-screen" class="screen">
+        <h2>🛍️ 夢想商店</h2>
+        <p>你想把錢花掉，還是存起來買大玩具？</p>
+        
+        <div class="shop-grid">
+            <div class="item-card">
+                <div class="item-emoji">🍬</div>
+                <div>甜甜糖果</div>
+                <div class="price">💰 3</div>
+                <button class="btn" style="padding: 5px 15px; font-size: 14px;" onclick="buyItem('糖果', 3)">購買</button>
+            </div>
+            <div class="item-card">
+                <div class="item-emoji">🍦</div>
+                <div>冰淇淋</div>
+                <div class="price">💰 5</div>
+                <button class="btn" style="padding: 5px 15px; font-size: 14px;" onclick="buyItem('冰淇淋', 5)">購買</button>
+            </div>
+            <div class="item-card" style="grid-column: span 2; border-color: #ff9a9e;">
+                <div class="item-emoji">🤖</div>
+                <div><strong>超級機器人 (大夢想)</strong></div>
+                <div class="price">💰 20</div>
+                <button class="btn" style="padding: 5px 15px; font-size: 14px; background: #ff6f61;" onclick="buyItem('機器人', 20)">購買</button>
+            </div>
+        </div>
+
+        <div id="shop-msg" class="message"></div>
+        <button class="btn" style="background: #ccc; box-shadow: 0 4px 0 #999;" onclick="showScreen('home-screen')">返回</button>
+    </div>
+</div>
+
+<script>
+    let balance = 0;
+
+    function showScreen(screenId) {
+        // 隱藏所有螢幕
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        // 顯示指定的螢幕
+        document.getElementById(screenId).classList.add('active');
+        // 清空訊息
+        document.getElementById('shop-msg').innerText = '';
+    }
+
+    function earnMoney() {
+        balance += 1;
+        updateUI();
+        const balEl = document.getElementById('balance');
+        balEl.classList.add('coin-animation');
+        setTimeout(() => balEl.classList.remove('coin-animation'), 500);
+    }
+
+    function buyItem(name, price) {
+        const msgEl = document.getElementById('shop-msg');
+        if (balance >= price) {
+            balance -= price;
+            updateUI();
+            if (name === '機器人') {
+                msgEl.innerHTML = "✨ 太棒了！你存好久終於買到夢想中的機器人了！ ✨";
+                msgEl.style.color = "#ff6f61";
+            } else {
+                msgEl.innerText = "好吃！你買了 " + name + "，錢變少了唷。";
+                msgEl.style.color = "#4a90e2";
+            }
+        } else {
+            msgEl.innerText = "錢錢還不夠喔，再去幫忙做家事吧！";
+            msgEl.style.color = "#cc0000";
+        }
+    }
+
+    function updateUI() {
+        document.getElementById('balance').innerText = balance;
+    }
+</script>
+
+</body>
+</html>

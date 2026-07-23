@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太空小英雄大冒險</title>
+    <style>
+        :root {
+            --primary-color: #ffd600; /* 星星黃 */
+            --secondary-color: #1e88e5; /* 科技藍 */
+            --stop-color: #ef5350; /* 警告紅 */
+            --bg-color: #0b0f19; /* 深太空背景 */
+            --panel-bg: #1a237e; /* 儀表板藍 */
+            --font-main: 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-main);
+            background-color: #e0e0e0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            user-select: none;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 500px;
+            height: 90vh;
+            background: var(--bg-color);
+            background-image: radial-gradient(circle, #1a237e 0%, #000000 100%);
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 30px;
+            border: 8px solid #3949ab;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 頂部儀表板 */
+        #top-bar {
+            padding: 15px 20px;
+            background: linear-gradient(90deg, #1565c0, #0d47a1);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            font-weight: bold;
+            z-index: 10;
+            border-bottom: 4px solid #64b5f6;
+        }
+
+        .screen {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .screen.active { display: flex; }
+
+        /* 按鈕樣式 */
+        .btn {
+            background: var(--primary-color);
+            border: 4px solid #ffab00;
+            border-radius: 50px;
+            color: #212121;
+            padding: 15px 40px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 5px 0 #ffab00;
+            transition: 0.1s;
+        }
+
+        .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #ffab00; }
+
+        /* 停止按鈕 - 醒目紅色 */
+        .btn-stop {
+            background: var(--stop-color);
+            border-color: #c62828;
+            color: white;
+            box-shadow: 0 5px 0 #c62828;
+            padding: 10px 30px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            z-index: 20;
+        }
+
+        .btn-stop:active { box-shadow: 0 2px 0 #c62828; }
+
+        /* 遊戲一：雷達鎖定（配對） */
+        .space-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            width: 100%;
+        }
+
+        .space-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid #00e5ff;
+            border-radius: 20px;
+            font-size: 4rem;
+            padding: 15px;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+            transition: 0.2s;
+        }
+        
+        .space-card:active {
+            transform: scale(0.95);
+        }
+
+        /* 遊戲二：星際清除（射擊掉落物） */
+        #space-stage {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            border-radius: 20px;
+        }
+
+        .meteor {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            cursor: pointer;
+            animation: floatDown 5s linear forwards;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.5));
+        }
+
+        @keyframes floatDown {
+            from { transform: translateY(-100px) rotate(0deg); }
+            to { transform: translateY(800px) rotate(360deg); }
+        }
+
+        /* 結算彈窗 */
+        #result-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            text-align: center;
+            backdrop-filter: blur(3px);
+        }
+        
+        /* 星星裝飾背景 */
+        .bg-star {
+            position: absolute;
+            color: white;
+            opacity: 0.3;
+            z-index: 0;
+            animation: twinkle 2s infinite alternate;
+        }
+        @keyframes twinkle {
+            from { opacity: 0.1; transform: scale(0.8); }
+            to { opacity: 0.6; transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="top-bar">
+        <span>⏱️ <span id="timer">00:00</span></span>
+        <span>⭐ 能量: <span id="score">0</span></span>
+    </div>
+
+    <!-- 主選單 -->
+    <div id="screen-menu" class="screen active">
+        <h1 style="color: #00e5ff; font-size: 2.2rem; text-shadow: 0 0 10px #00e5ff;">🚀 太空小英雄</h1>
+        <div class="bg-star" style="top: 20%; left: 15%; font-size: 1rem;">⭐</div>
+        <div class="bg-star" style="top: 30%; right: 20%; font-size: 1.5rem;">⭐</div>
+        <div class="bg-star" style="bottom: 25%; left: 30%; font-size: 1.2rem;">⭐</div>
+        
+        <button class="btn" onclick="startGame('radar')">📡 雷達鎖定</button>
+        <button class="btn" onclick="startGame('shoot')">☄️ 隕石清除</button>
+    </div>
+
+    <!-- 遊戲一：雷達鎖定 -->
+    <div id="screen-radar" class="screen">
+        <div style="background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 20px; border: 2px solid #ffea00; margin-bottom: 20px; z-index: 1;">
+            <div id="radar-hint" style="font-size: 1.8rem; color: #ffea00; font-weight: bold;">📡 載入中...</div>
+        </div>
+        <div class="space-grid" id="radar-options" style="z-index: 1;"></div>
+        <button class="btn btn-stop" onclick="stopGame()">🛑 返回基地</button>
+    </div>
+
+    <!-- 遊戲二：隕石清除 -->
+    <div id="screen-shoot" class="screen">
+        <div id="space-stage"></div>
+        <button class="btn btn-stop" style="position: absolute; bottom: 20px;" onclick="stopGame()">🛑 返回基地</button>
+    </div>
+
+    <!-- 結算畫面 -->
+    <div id="result-overlay">
+        <div style="font-size: 4rem; margin-bottom: 10px;">🏆</div>
+        <h2 style="font-size: 2.5rem; color: #ffd600; margin: 0;">任務完成！</h2>
+        <p id="final-stat" style="font-size: 1.5rem; line-height: 1.8;"></p>
+        <button class="btn" onclick="closeResult()">返回主機</button>
+    </div>
+</div>
+
+<script>
+    let score = 0;
+    let seconds = 0;
+    let timerInterval, spawnInterval;
+    
+    // 太空物件清單 (給雷達遊戲使用)
+    const spaceObjects = [
+        { i: '👽', n: '外星人' },
+        { i: '🛸', n: '幽浮飛碟' },
+        { i: '🪐', n: '土星環' },
+        { i: '☄️', n: '火焰隕石' },
+        { i: '🚀', n: '火箭' },
+        { i: '👨‍🚀', n: '太空人' }
+    ];
+
+    // 掉落物清單 (給清除遊戲使用)
+    const fallingObjects = ['👾', '☄️', '🛸', '🛰️'];
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('screen-' + id).classList.add('active');
+    }
+
+    // 計時器邏輯
+    function startTimer() {
+        seconds = 0;
+        document.getElementById('timer').innerText = "00:00";
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            seconds++;
+            let m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            let s = (seconds % 60).toString().padStart(2, '0');
+            document.getElementById('timer').innerText = `${m}:${s}`;
+        }, 1000);
+    }
+
+    // 開始遊戲
+    function startGame(mode) {
+        score = 0;
+        document.getElementById('score').innerText = score;
+        startTimer();
+        showScreen(mode);
+
+        if (mode === 'radar') initRadar();
+        else if (mode === 'shoot') initShoot();
+    }
+
+    // 停止遊戲
+    function stopGame() {
+        clearInterval(timerInterval);
+        clearInterval(spawnInterval);
+        const timeStr = document.getElementById('timer').innerText;
+        document.getElementById('final-stat').innerHTML = `你收集了 <b style="color:#00e5ff">${score}</b> 點能量<br>飛行時間：${timeStr}`;
+        document.getElementById('result-overlay').style.display = 'flex';
+    }
+
+    function closeResult() {
+        document.getElementById('result-overlay').style.display = 'none';
+        showScreen('menu');
+    }
+
+    // --- 遊戲邏輯：雷達鎖定 (找相同) ---
+    function initRadar() {
+        const container = document.getElementById('radar-options');
+        container.innerHTML = '';
+        
+        // 隨機選4個不同的太空物件
+        const shuffled = [...spaceObjects].sort(() => 0.5 - Math.random()).slice(0, 4);
+        // 決定目標
+        const target = shuffled[Math.floor(Math.random() * 4)];
+        
+        document.getElementById('radar-hint').innerText = `請找出「${target.n}」`;
+
+        shuffled.forEach(obj => {
+            const div = document.createElement('div');
+            div.className = 'space-card';
+            div.innerText = obj.i;
+            div.onclick = () => {
+                if (obj.i === target.i) {
+                    // 答對了
+                    score += 10;
+                    document.getElementById('score').innerText = score;
+                    div.style.background = 'rgba(0, 229, 255, 0.5)';
+                    setTimeout(initRadar, 300); // 短暫延遲後換下一題
+                } else {
+                    // 答錯了
+                    div.style.background = 'rgba(239, 83, 80, 0.5)';
+                    div.style.borderColor = '#ef5350';
+                    setTimeout(() => {
+                        div.style.background = 'rgba(255, 255, 255, 0.1)';
+                        div.style.borderColor = '#00e5ff';
+                    }, 300);
+                }
+            };
+            container.appendChild(div);
+        });
+    }
+
+    // --- 遊戲邏輯：隕石清除 (點擊掉落物) ---
+    function initShoot() {
+        const stage = document.getElementById('space-stage');
+        stage.innerHTML = ''; // 清空舞台
+        
+        spawnInterval = setInterval(() => {
+            const meteor = document.createElement('div');
+            meteor.className = 'meteor';
+            // 隨機選擇圖案
+            meteor.innerText = fallingObjects[Math.floor(Math.random() * fallingObjects.length)];
+            // 隨機水平位置 (避免超出邊界)
+            meteor.style.left = Math.random() * 80 + '%';
+            
+            // 點擊事件：擊毀
+            meteor.onmousedown = meteor.ontouchstart = function(e) {
+                e.preventDefault(); // 防止手機端雙擊放大
+                if (meteor.innerText === '💥') return; // 已經爆炸過了就不加分
+                
+                score += 5;
+                document.getElementById('score').innerText = score;
+                meteor.innerText = '💥'; // 爆炸特效
+                meteor.style.transform = 'scale(1.5)';
+                meteor.style.transition = '0.1s';
+                
+                // 0.3秒後消失
+                setTimeout(() => meteor.remove(), 300);
+            };
+            
+            stage.appendChild(meteor);
+            
+            // 5秒後若沒點到自動移除 (與動畫時間一致)
+            setTimeout(() => {
+                if (meteor.parentNode) meteor.remove();
+            }, 5000);
+            
+        }, 800); // 每0.8秒產生一個新的
+    }
+</script>
+
+</body>
+</html>

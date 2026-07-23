@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEAM 知識文案整理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#1e3a8a',
+                        secondary: '#475569',
+                        accent: '#0d9488',
+                        bg: '#f8fafc',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f8fafc; }
+        .glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); }
+        h1, h2, h3 { color: #1e293b; }
+        p { line-height: 1.8; color: #334155; margin-bottom: 1.5rem; }
+        .prose-custom { max-width: 800px; }
+        .accent-border { border-left: 4px solid #0d9488; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <!-- Header -->
+    <header class="w-full bg-slate-900 py-8 px-6 shadow-xl text-center">
+        <h1 class="text-3xl md:text-4xl font-bold text-white tracking-wide">STEAM 知識文案整理</h1>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-6 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start">
+            
+            <!-- Image Column -->
+            <div class="sticky top-12">
+                <div class="rounded-3xl overflow-hidden shadow-2xl border border-slate-200 bg-white p-2">
+                    <img src="https://opal.google/board/blobs/a9e5453d-7937-4bf4-ad0b-cdece709bdd5" alt="冷製手工皂製作過程示意圖" class="w-full h-auto object-cover rounded-2xl hover:scale-[1.02] transition-transform duration-500">
+                </div>
+                <div class="mt-6 text-sm text-slate-500 italic text-center">
+                    科學、技術與藝術的完美交融：冷製手工皂製作現場
+                </div>
+            </div>
+
+            <!-- Content Column -->
+            <div class="prose-custom">
+                <article>
+                    <h2 class="text-2xl md:text-3xl font-bold mb-6 text-primary border-b-2 border-teal-500 pb-2">冷製手工皂的藝術與科學：STEAM 教育解析</h2>
+                    
+                    <p class="text-lg">冷製手工皂（Cold Process Soap）的製作不僅是一門傳承已久的工藝，更是一個完美融合科學、技術、工程、藝術與數學的跨學科實踐場域。本文件將透過 STEAM 的五個核心面向，深度剖析冷製手工皂製作過程中的學理基礎與實務應用。</p>
+
+                    <h3 class="text-xl font-bold mt-8 mb-4 flex items-center gap-2"><span class="text-accent">●</span> 1. 科學 (Science)：皂化反應與油脂化學</h3>
+                    <p>冷製皂的核心建立在嚴謹的化學反應之上，即<strong>皂化反應（Saponification）</strong>。這是一個放熱反應，當三酸甘油酯與強鹼（氫氧化鈉，NaOH）混合時，生成「脂肪酸鈉」與「甘油」。不同油脂的脂肪酸結構決定物理特性：橄欖油提供保濕，乳木果油提升硬度與修護力。</p>
+
+                    <h3 class="text-xl font-bold mt-8 mb-4 flex items-center gap-2"><span class="text-accent">●</span> 2. 技術 (Technology)：精確控溫與乳化工具</h3>
+                    <p>現代製皂高度仰賴科技工具。紅外線溫度計確保反應在 35°C 至 45°C 的安全區間；手持式攪拌棒透過物理剪切力大幅縮短「乳化（Emulsion）」時間，是提升製程效率的關鍵。</p>
+
+                    <h3 class="text-xl font-bold mt-8 mb-4 flex items-center gap-2"><span class="text-accent">●</span> 3. 工程 (Engineering)：配方設計與製程管理</h3>
+                    <p>製作手工皂猶如微型工程。從調配油脂比例、控制油鹼溫差，到後續的「乾燥固化（Curing）」管理，每一環節皆需維持通風與溫濕度平衡，確保 pH 值穩定並提升耐用度。</p>
+
+                    <h3 class="text-xl font-bold mt-8 mb-4 flex items-center gap-2"><span class="text-accent">●</span> 4. 藝術 (Arts)：色彩、造型與視覺呈現</h3>
+                    <p>肥皂調色需理解礦物色粉的化學變性與油脂底色預判。此外，球體模具的流體力學應用、蓋皂章的力道掌控，以及最終的包裝美學，都是將科學實驗轉化為美感產物的過程。</p>
+
+                    <h3 class="text-xl font-bold mt-8 mb-4 flex items-center gap-2"><span class="text-accent">●</span> 5. 數學 (Mathematics)：精確計量與比例計算</h3>
+                    <p>數學是安全的基石。製皂者需精確計算「皂化價（SAP Value）」與「減鹼（Superfatting）」比例，並透過 INS 值與體積幾何公式（如球體體積公式：V = 4/3πr³），精確換算所需的總皂液重量，確保每一批次的完美成品。</p>
+                </article>
+            </div>
+        </div>
+    </main>
+
+    <!-- Animation Script for subtle hover effects -->
+    <script>
+        document.querySelectorAll('h3').forEach(el => {
+            el.addEventListener('mouseenter', () => el.classList.add('text-teal-600'));
+            el.addEventListener('mouseleave', () => el.classList.remove('text-teal-600'));
+        });
+    </script>
+</body>
+</html>

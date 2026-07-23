@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>馬年迎春打年獸</title>
+    <style>
+        /* 重置預設樣式 */
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            /* 新年喜慶背景 */
+            background-color: #B71C1C; 
+            background-image: radial-gradient(#D32F2F 15%, transparent 16%), radial-gradient(#D32F2F 15%, transparent 16%);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+            color: #FFD54F;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+            /* 自訂鞭炮游標 */
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" style="font-size: 24px"><text y="24">🧨</text></svg>'), auto;
+        }
+
+        #app {
+            background-color: rgba(30, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            border: 3px solid #FFCA28;
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 1.8rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            letter-spacing: 2px;
+        }
+
+        .instructions {
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 8px;
+            border-radius: 8px;
+            line-height: 1.5;
+            color: #FFF8E1;
+        }
+
+        .green { color: #81C784; font-weight: bold; }
+        .red { color: #E57373; font-weight: bold; }
+
+        #controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 10px;
+        }
+
+        .status {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .status span {
+            color: #FFCA28;
+        }
+
+        button {
+            background: linear-gradient(to bottom, #FFECB3, #FFCA28);
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #B71C1C;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: all 0.1s;
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        #start-btn:not(:disabled) {
+            animation: pulse 1.5s infinite;
+        }
+
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+        }
+
+        .hole {
+            background: #4E342E;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 10px 15px rgba(0,0,0,0.7), 0 2px 0 rgba(255,255,255,0.2);
+            border: 4px solid #3E2723;
+            aspect-ratio: 1 / 1;
+        }
+
+        .character {
+            position: absolute;
+            bottom: -100%; 
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.5rem;
+            transition: bottom 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
+            /* 指針改變以提升打擊手感 */
+            cursor: crosshair; 
+        }
+
+        /* 出現時的動畫類別 */
+        .character.up {
+            bottom: 0%; 
+        }
+
+        .character:active {
+            transform: scale(0.85); /* 點擊時有微縮的回饋感 */
+        }
+
+        /* 飄浮分數的特效 */
+        .float-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.8rem;
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatUp 0.6s ease-out forwards;
+            z-index: 10;
+            text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -150%) scale(1.5); }
+        }
+
+        /* 遊戲結束結算視窗 */
+        #message-box {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(3px);
+            border-radius: 12px;
+        }
+
+        #message-box.hidden {
+            display: none;
+        }
+
+        #message-box h2 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #FFCA28;
+        }
+
+        #message-box p {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        
+        #final-score {
+            color: #4CAF50;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        /* RWD 調整小螢幕 */
+        @media (max-width: 360px) {
+            .character { font-size: 2.8rem; }
+            h1 { font-size: 1.5rem; }
+            #grid { gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <h1>馬年迎春打年獸</h1>
+        <p class="instructions">點擊年獸 (👹) <span class="green">+10分</span><br>小心別打到馬兒 (🐴) <span class="red">-10分</span>！</p>
+        
+        <div id="controls">
+            <div class="status">
+                <div>剩餘時間: <span id="time">30</span> s</div>
+                <div>總得分: <span id="score">0</span></div>
+            </div>
+            <button id="start-btn">開始遊戲</button>
+        </div>
+        
+        <div id="grid">
+            <!-- 9 個洞穴與動態角色 -->
+            <div class="hole"><div class="character"></div></div>
+            <div class="hole"><div class="character"></div></div>
+            <div class="hole"><div class="character"></div></div>
+            <div class="hole"><div class="character"></div></div>
+            <div class="hole"><div class="character"></div></div>
+            <div class="hole"><div class="character"></div></div>
+            <div class="hole"><div class="character"></div></div>
+            <div class="hole"><div class="character"></div></div>
+            <div class="hole"><div class="character"></div></div>
+        </div>
+
+        <!-- 遊戲結束對話框 -->
+        <div id="message-box" class="hidden">
+            <h2>時間到！ 🎊</h2>
+            <p>你的最終分數是<br><span id="final-score">0</span></p>
+            <button id="close-msg-btn">確定並再玩一次</button>
+        </div>
+    </div>
+
+    <script>
+        const holes = document.querySelectorAll('.hole');
+        const characters = document.querySelectorAll('.character');
+        const scoreBoard = document.querySelector('#score');
+        const timeBoard = document.querySelector('#time');
+        const startBtn = document.querySelector('#start-btn');
+        const msgBox = document.querySelector('#message-box');
+        const finalScore = document.querySelector('#final-score');
+        const closeBtn = document.querySelector('#close-msg-btn');
+
+        let lastHole;
+        let timeUp = false;
+        let score = 0;
+        let countdown;
+        let timeLeft = 30;
+
+        // 產生隨機時間 (決定探頭速度)
+        function randomTime(min, max) {
+            return Math.round(Math.random() * (max - min) + min);
+        }
+
+        // 隨機選一個洞穴，並且避免跟上一次重複
+        function randomHole(holes) {
+            const idx = Math.floor(Math.random() * holes.length);
+            const hole = holes[idx];
+            if (hole === lastHole) {
+                return randomHole(holes);
+            }
+            lastHole = hole;
+            return hole;
+        }
+
+        // 控制角色探頭
+        function peep() {
+            // 遊戲難度變化：分數越高，出現越快
+            const minT = Math.max(250, 600 - score * 2);
+            const maxT = Math.max(500, 1200 - score * 2);
+            const time = randomTime(minT, maxT);
+            const hole = randomHole(holes);
+            const character = hole.querySelector('.character');
+            
+            // 設定角色類型：80% 機率是年獸，20% 機率是馬
+            const isNian = Math.random() < 0.8;
+            character.textContent = isNian ? '👹' : '🐴';
+            character.dataset.type = isNian ? 'nian' : 'horse';
+            character.dataset.whacked = 'false'; // 重置打擊狀態
+            
+            // 彈出動畫
+            character.classList.add('up');
+            
+            // 設定時間後自動縮回
+            setTimeout(() => {
+                character.classList.remove('up');
+                if (!timeUp) peep();
+            }, time);
+        }
+
+        // 開始遊戲主程式
+        function startGame() {
+            scoreBoard.textContent = 0;
+            timeBoard.textContent = 30;
+            timeUp = false;
+            score = 0;
+            timeLeft = 30;
+            startBtn.disabled = true;
+            msgBox.classList.add('hidden');
+            
+            // 清理盤面上可能還殘留的動畫狀態
+            characters.forEach(c => {
+                c.classList.remove('up');
+                c.dataset.whacked = 'false';
+                // 移除畫面上可能還在的飄浮文字
+                const floats = c.parentElement.querySelectorAll('.float-text');
+                floats.forEach(f => f.remove());
+            });
+
+            peep();
+            
+            countdown = setInterval(() => {
+                timeLeft--;
+                timeBoard.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    timeUp = true;
+                    startBtn.disabled = false;
+                    
+                    // 等最後一個洞穴動畫結束再彈出結算
+                    setTimeout(() => {
+                        finalScore.textContent = score;
+                        msgBox.classList.remove('hidden');
+                    }, 800);
+                }
+            }, 1000);
+        }
+
+        // 處理玩家打擊動作
+        function whack(e) {
+            // 防止作弊腳本點擊
+            if(!e.isTrusted && e.type !== 'touchstart') return; 
+            // 如果已經被打過了就跳過 (防連點)
+            if(this.dataset.whacked === 'true') return;
+            
+            this.dataset.whacked = 'true';
+            this.classList.remove('up'); // 立刻縮回洞裡
+            
+            const type = this.dataset.type;
+            const holeParent = this.parentElement;
+            
+            // 創建飄浮文字的視覺效果
+            const floatText = document.createElement('div');
+            floatText.className = 'float-text';
+
+            if (type === 'nian') {
+                score += 10;
+                floatText.textContent = "+10";
+                floatText.style.color = "#4CAF50"; // 綠色加分
+            } else {
+                score -= 10;
+                floatText.textContent = "-10";
+                floatText.style.color = "#FF5252"; // 紅色扣分
+            }
+            
+            holeParent.appendChild(floatText);
+            // 動畫結束後移除 DOM
+            setTimeout(() => floatText.remove(), 600);
+            
+            scoreBoard.textContent = score;
+        }
+
+        // 綁定事件
+        startBtn.addEventListener('click', startGame);
+        
+        closeBtn.addEventListener('click', () => {
+            msgBox.classList.add('hidden');
+        });
+
+        characters.forEach(char => {
+            // 綁定滑鼠點擊
+            char.addEventListener('mousedown', whack);
+            // 針對觸控螢幕優化，避免遲滯
+            char.addEventListener('touchstart', function(e) {
+                e.preventDefault(); 
+                whack.call(this, e); 
+            }, { passive: false });
+        });
+    </script>
+</body>
+</html>

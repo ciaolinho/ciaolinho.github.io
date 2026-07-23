@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>自然冒險家</title>
+    <style>
+        /* 基本重置與變數設定 */
+        :root {
+            --bg-color: #e8f5e9;
+            --primary-color: #4CAF50;
+            --primary-dark: #388E3C;
+            --secondary-color: #FFC107;
+            --text-dark: #333;
+            --card-bg: #ffffff;
+            --wrong-color: #f44336;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none; /* 防止幼兒誤觸反白 */
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation; /* 改善觸控體驗 */
+        }
+
+        /* 遊戲主容器 */
+        #game-app {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 500px;
+            height: 100vh;
+            max-height: 850px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 501px) {
+            #game-app { height: 90vh; }
+        }
+
+        /* 畫面切換控制 */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* 標題畫面 */
+        .title-emoji { font-size: 80px; margin-bottom: 10px; animation: float 3s ease-in-out infinite; }
+        .title-text { font-size: 36px; color: var(--primary-dark); font-weight: bold; margin-bottom: 20px; }
+        .subtitle { font-size: 18px; color: #666; margin-bottom: 40px; }
+
+        /* 按鈕共用樣式 */
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 0 var(--primary-dark);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 0 0 var(--primary-dark);
+        }
+        .btn-yellow {
+            background-color: var(--secondary-color);
+            box-shadow: 0 6px 0 #FF9800;
+            color: #333;
+        }
+        .btn-yellow:active { box-shadow: 0 0 0 #FF9800; }
+
+        /* 遊戲進行畫面 */
+        .header {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255,255,255,0.9);
+            z-index: 10;
+        }
+        .progress-bar {
+            width: 60%;
+            height: 15px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .score-text { font-size: 20px; font-weight: bold; color: var(--primary-dark); }
+
+        .question-area {
+            margin-top: 60px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        .prompt-text {
+            font-size: 28px;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .target-emoji {
+            font-size: 100px;
+            margin-bottom: 30px;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+            padding: 0 20px;
+        }
+        .option-card {
+            background-color: white;
+            border: 4px solid #eee;
+            border-radius: 20px;
+            padding: 20px 10px;
+            font-size: 60px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.2s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .option-card:hover { border-color: var(--primary-color); transform: scale(1.05); }
+        .option-card:active { transform: scale(0.95); }
+        .option-name { font-size: 18px; color: #555; margin-top: 10px; font-weight: bold; }
+
+        /* 結算畫面 */
+        .medal { font-size: 120px; margin-bottom: 20px; animation: tada 1s infinite; }
+        .final-score { font-size: 32px; margin-bottom: 30px; color: var(--primary-dark); }
+
+        /* 動畫效果 */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes tada {
+            0% { transform: scale(1); }
+            10%, 20% { transform: scale(0.9) rotate(-3deg); }
+            30%, 50%, 70%, 90% { transform: scale(1.1) rotate(3deg); }
+            40%, 60%, 80% { transform: scale(1.1) rotate(-3deg); }
+            100% { transform: scale(1); }
+        }
+        .anim-correct { animation: pop 0.5s ease; border-color: var(--primary-color) !important; background-color: #e8f5e9; }
+        .anim-wrong { animation: shake 0.5s ease; border-color: var(--wrong-color) !important; background-color: #ffebee; }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        /* 語音按鈕 */
+        .speak-btn {
+            background: none; border: none; font-size: 30px; cursor: pointer;
+            margin-left: 10px; vertical-align: middle;
+            transition: transform 0.2s;
+        }
+        .speak-btn:active { transform: scale(0.8); }
+
+        /* 慶祝碎紙花容器 */
+        #confetti-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 100; overflow: hidden; display: none;
+        }
+        .confetti {
+            position: absolute; width: 15px; height: 15px; background-color: #f00;
+            opacity: 0.8; animation: fall linear forwards;
+        }
+        @keyframes fall {
+            to { transform: translateY(100vh) rotate(720deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-app">
+    <!-- 1. 標題畫面 -->
+    <div id="screen-start" class="screen active">
+        <div class="title-emoji">🌺🌳</div>
+        <h1 class="title-text">自然冒險家</h1>
+        <p class="subtitle">水果收集 ＆ 動物棲息地大考驗</p>
+        <button class="btn" onclick="startGame()">開始探險</button>
+    </div>
+
+    <!-- 2. 遊戲畫面 -->
+    <div id="screen-game" class="screen">
+        <div class="header">
+            <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+            <div class="score-text">⭐ <span id="score-display">0</span></div>
+        </div>
+        
+        <div class="question-area">
+            <div class="prompt-text">
+                <span id="question-text">載入中...</span>
+                <button class="speak-btn" onclick="repeatSpeech()">🔊</button>
+            </div>
+            <div id="target-emoji" class="target-emoji">❓</div>
+            <div id="options-container" class="options-grid">
+                <!-- 選項會由 JS 動態生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 結算畫面 -->
+    <div id="screen-end" class="screen">
+        <div id="confetti-container"></div>
+        <div class="medal">🏆</div>
+        <h1 class="title-text">探險完成！</h1>
+        <p class="final-score">你總共得到了 <span id="final-score-text">0</span> 顆星星 ⭐</p>
+        <p class="subtitle" style="margin-bottom:20px;">你是一位超棒的自然冒險家！</p>
+        <button class="btn btn-yellow" onclick="returnToTitle()">再玩一次</button>
+    </div>
+</div>
+
+<script>
+    // === 遊戲資料設定 (根據簡報內容設計) ===
+    
+    // 果實與水果卡 (玩法二對應)
+    const fruits = [
+        { id: 'f1', name: '蘋果', emoji: '🍎', type: 'fruit' },
+        { id: 'f2', name: '香蕉', emoji: '🍌', type: 'fruit' },
+        { id: 'f3', name: '西瓜', emoji: '🍉', type: 'fruit' },
+        { id: 'f4', name: '草莓', emoji: '🍓', type: 'fruit' },
+        { id: 'f5', name: '栗子', emoji: '🌰', type: 'seed' },
+        { id: 'f6', name: '葡萄', emoji: '🍇', type: 'fruit' },
+        { id: 'f7', name: '鳳梨', emoji: '🍍', type: 'fruit' },
+        { id: 'f8', name: '水蜜桃', emoji: '🍑', type: 'fruit' }
+    ];
+
+    // 棲息地與動物卡 (玩法三對應)
+    const habitats = [
+        { id: 'h1', name: '樹林', emoji: '🌲' },
+        { id: 'h2', name: '草地', emoji: '🌿' },
+        { id: 'h3', name: '河邊', emoji: '🌊' },
+        { id: 'h4', name: '洞穴', emoji: '🪨' }
+    ];
+
+    const animals = [
+        { id: 'a1', name: '猴子', emoji: '🐒', habitatId: 'h1' },
+        { id: 'a2', name: '松鼠', emoji: '🐿️', habitatId: 'h1' },
+        { id: 'a3', name: '貓頭鷹', emoji: '🦉', habitatId: 'h1' },
+        { id: 'a4', name: '兔子', emoji: '🐇', habitatId: 'h2' },
+        { id: 'a5', name: '毛毛蟲', emoji: '🐛', habitatId: 'h2' },
+        { id: 'a6', name: '蝴蝶', emoji: '🦋', habitatId: 'h2' },
+        { id: 'a7', name: '青蛙', emoji: '🐸', habitatId: 'h3' },
+        { id: 'a8', name: '魚', emoji: '🐟', habitatId: 'h3' },
+        { id: 'a9', name: '螃蟹', emoji: '🦀', habitatId: 'h3' },
+        { id: 'a10', name: '熊', emoji: '🐻', habitatId: 'h4' },
+        { id: 'a11', name: '蝙蝠', emoji: '🦇', habitatId: 'h4' }
+    ];
+
+    // === 遊戲狀態管理 ===
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let isProcessingAnswer = false;
+    const totalQuestionsPerGame = 8; // 每次遊戲 8 題
+
+    // === 核心遊戲邏輯 ===
+
+    // 洗牌函數
+    function shuffleArray(array) {
+        let newArray = [...array];
+        for (let i = newArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        }
+        return newArray;
+    }
+
+    // 產生遊戲題目
+    function generateQuestions() {
+        let questions = [];
+        
+        // 產生果實尋找題 (玩法二) - 4題
+        let shuffledFruits = shuffleArray(fruits);
+        for(let i = 0; i < 4; i++) {
+            let targetFruit = shuffledFruits[i];
+            let otherFruits = shuffledFruits.filter(f => f.id !== targetFruit.id);
+            otherFruits = shuffleArray(otherFruits).slice(0, 3); // 取另外3個錯誤選項
+            
+            let options = shuffleArray([targetFruit, ...otherFruits]);
+            
+            questions.push({
+                type: 'find_fruit',
+                promptText: `請找出「${targetFruit.name}」！`,
+                speechText: `請找出，${targetFruit.name}`,
+                targetEmoji: '🧺', // 顯示籃子
+                options: options.map(opt => ({ id: opt.id, emoji: opt.emoji, name: opt.name })),
+                correctId: targetFruit.id
+            });
+        }
+
+        // 產生棲息地題 (玩法三) - 4題
+        let shuffledAnimals = shuffleArray(animals);
+        for(let i = 0; i < 4; i++) {
+            let targetAnimal = shuffledAnimals[i];
+            let options = habitats; // 固定 4 個棲息地選項
+            
+            questions.push({
+                type: 'animal_habitat',
+                promptText: `「${targetAnimal.name}」住在哪裡？`,
+                speechText: `${targetAnimal.name}，住在哪裡呢？`,
+                targetEmoji: targetAnimal.emoji,
+                options: options.map(opt => ({ id: opt.id, emoji: opt.emoji, name: opt.name })),
+                correctId: targetAnimal.habitatId
+            });
+        }
+
+        // 混合所有題目
+        return shuffleArray(questions);
+    }
+
+    // 語音朗讀
+    function speak(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel(); // 停止先前的語音
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-TW';
+            utterance.rate = 0.9; // 放慢語速適合幼兒
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    function repeatSpeech() {
+        if(currentQuestions[currentQuestionIndex]) {
+            speak(currentQuestions[currentQuestionIndex].speechText);
+        }
+    }
+
+    // UI 控制函數
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    // 開始遊戲
+    function startGame() {
+        score = 0;
+        currentQuestionIndex = 0;
+        currentQuestions = generateQuestions();
+        
+        document.getElementById('score-display').innerText = score;
+        updateProgressBar();
+        
+        showScreen('screen-game');
+        
+        // 為了觸發 iOS 等設備的語音權限，必須在點擊事件中初始化語音
+        if ('speechSynthesis' in window) {
+            let initUtterance = new SpeechSynthesisUtterance('');
+            window.speechSynthesis.speak(initUtterance);
+        }
+        
+        loadQuestion();
+    }
+
+    // 載入題目
+    function loadQuestion() {
+        isProcessingAnswer = false;
+        const q = currentQuestions[currentQuestionIndex];
+        
+        document.getElementById('question-text').innerText = q.promptText;
+        document.getElementById('target-emoji').innerText = q.targetEmoji;
+        
+        const optionsContainer = document.getElementById('options-container');
+        optionsContainer.innerHTML = '';
+        
+        q.options.forEach(opt => {
+            const btn = document.createElement('div');
+            btn.className = 'option-card';
+            btn.innerHTML = `<div>${opt.emoji}</div><div class="option-name">${opt.name}</div>`;
+            btn.onclick = () => checkAnswer(opt.id, btn);
+            optionsContainer.appendChild(btn);
+        });
+
+        // 自動朗讀題目
+        setTimeout(() => speak(q.speechText), 300);
+    }
+
+    // 檢查答案
+    function checkAnswer(selectedId, buttonElement) {
+        if (isProcessingAnswer) return;
+        isProcessingAnswer = true;
+        
+        const q = currentQuestions[currentQuestionIndex];
+        
+        if (selectedId === q.correctId) {
+            // 答對了
+            buttonElement.classList.add('anim-correct');
+            speak('答對了！好棒！');
+            score++;
+            document.getElementById('score-display').innerText = score;
+            createMiniConfetti(buttonElement);
+            
+            setTimeout(() => {
+                nextQuestion();
+            }, 1500);
+        } else {
+            // 答錯了
+            buttonElement.classList.add('anim-wrong');
+            speak('再想想看喔！');
+            
+            setTimeout(() => {
+                buttonElement.classList.remove('anim-wrong');
+                isProcessingAnswer = false;
+            }, 800);
+        }
+    }
+
+    // 下一題
+    function nextQuestion() {
+        currentQuestionIndex++;
+        updateProgressBar();
+        
+        if (currentQuestionIndex < currentQuestions.length) {
+            loadQuestion();
+        } else {
+            endGame();
+        }
+    }
+
+    function updateProgressBar() {
+        const percentage = (currentQuestionIndex / currentQuestions.length) * 100;
+        document.getElementById('progress-fill').style.width = percentage + '%';
+    }
+
+    // 遊戲結束
+    function endGame() {
+        document.getElementById('final-score-text').innerText = score;
+        showScreen('screen-end');
+        speak(`恭喜完成！你總共得到了 ${score} 顆星星`);
+        startConfetti();
+    }
+
+    function returnToTitle() {
+        stopConfetti();
+        showScreen('screen-start');
+    }
+
+    // === 特效函數 (無須外部套件的碎紙花) ===
+    
+    function createMiniConfetti(element) {
+        const rect = element.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        for (let i = 0; i < 10; i++) {
+            createParticle(centerX, centerY, true);
+        }
+    }
+
+    function startConfetti() {
+        const container = document.getElementById('confetti-container');
+        container.style.display = 'block';
+        container.innerHTML = '';
+        
+        for (let i = 0; i < 50; i++) {
+            setTimeout(() => {
+                if (container.style.display === 'block') {
+                    createParticle(Math.random() * window.innerWidth, -20, false);
+                }
+            }, i * 100);
+        }
+    }
+
+    function stopConfetti() {
+        document.getElementById('confetti-container').style.display = 'none';
+        document.getElementById('confetti-container').innerHTML = '';
+    }
+
+    function createParticle(x, y, isMini) {
+        const colors = ['#FFC107', '#4CAF50', '#2196F3', '#f44336', '#9C27B0'];
+        const particle = document.createElement('div');
+        particle.className = 'confetti';
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+        particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        if (isMini) {
+            particle.style.width = '8px';
+            particle.style.height = '8px';
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = 20 + Math.random() * 30;
+            particle.style.transition = 'all 0.8s ease-out';
+            
+            document.body.appendChild(particle);
+            
+            // Trigger reflow
+            void particle.offsetWidth;
+            
+            particle.style.transform = `translate(${Math.cos(angle) * velocity}px, ${Math.sin(angle) * velocity - 30}px) rotate(${Math.random() * 360}deg)`;
+            particle.style.opacity = '0';
+            
+            setTimeout(() => particle.remove(), 800);
+        } else {
+            const duration = 2 + Math.random() * 3;
+            particle.style.animation = `fall ${duration}s linear forwards`;
+            document.getElementById('confetti-container').appendChild(particle);
+            setTimeout(() => particle.remove(), duration * 1000);
+        }
+    }
+
+</script>
+</body>
+</html>

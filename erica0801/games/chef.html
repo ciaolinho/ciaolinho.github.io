@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>巧琳的食物遊戲 - 神奇料理鍋</title>
+<style>
+  /* ====== 基礎與背景設定 ====== */
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  
+  body {
+    font-family: 'Comic Sans MS', 'Chalkboard SE', '微軟正黑體', sans-serif;
+    background-color: #fff3e0;
+    background-image: 
+      radial-gradient(#ffe0b2 15%, transparent 16%), 
+      radial-gradient(#ffe0b2 15%, transparent 16%);
+    background-size: 60px 60px;
+    background-position: 0 0, 30px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    box-sizing: border-box;
+    touch-action: manipulation;
+  }
+
+  #app {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ====== 標題與版權 ====== */
+  h1 {
+    color: #e64a19;
+    text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff;
+    font-size: 2.8rem;
+    margin: 5px 0;
+    text-align: center;
+    letter-spacing: 2px;
+  }
+
+  .game-board {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 25px;
+    padding: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border: 6px solid #ffcc80;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ====== 角色與對話框區域 ====== */
+  .character-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 20px;
+    gap: 15px;
+  }
+
+  .character {
+    font-size: 5.5rem;
+    transition: all 0.3s;
+    user-select: none;
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.1));
+  }
+
+  .bubble {
+    background: #fff;
+    border: 4px solid #ffb74d;
+    border-radius: 20px;
+    padding: 15px 25px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #424242;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    max-width: 60%;
+  }
+
+  .bubble::after {
+    content: '';
+    position: absolute;
+    left: -15px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 10px 15px 10px 0;
+    border-style: solid;
+    border-color: transparent #ffb74d transparent transparent;
+  }
+
+  .target-highlight {
+    color: #e64a19;
+    font-size: 1.8rem;
+  }
+
+  /* ====== 廚房料理區域 ====== */
+  .kitchen {
+    position: relative;
+    width: 200px;
+    height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  /* 鍋子 */
+  .pot-container {
+    position: relative;
+    width: 160px;
+    height: 100px;
+    background: #78909c;
+    border-radius: 20px 20px 40px 40px;
+    border: 5px solid #546e7a;
+    box-shadow: inset -10px -10px 20px rgba(0,0,0,0.2), 0 10px 10px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    z-index: 10;
+  }
+
+  .pot-ears {
+    position: absolute;
+    top: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 -15px;
+  }
+
+  .pot-ears::before, .pot-ears::after {
+    content: '';
+    width: 25px;
+    height: 35px;
+    background: #37474f;
+    border-radius: 10px;
+    position: absolute;
+  }
+  .pot-ears::before { left: -15px; }
+  .pot-ears::after { right: -15px; }
+
+  .pot-interior {
+    width: 140px;
+    height: 30px;
+    background: #455a64;
+    border-radius: 50%;
+    margin-top: -15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  /* 鍋蓋 */
+  .pot-lid {
+    position: absolute;
+    width: 150px;
+    height: 40px;
+    background: #b0bec5;
+    border-radius: 50px 50px 0 0;
+    border: 4px solid #78909c;
+    top: 30px;
+    left: -120px; /* 預設放在旁邊 */
+    transition: all 0.5s ease-in-out;
+    z-index: 20;
+    opacity: 0;
+  }
+  .pot-lid::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 15px;
+    background: #37474f;
+    border-radius: 10px 10px 0 0;
+  }
+
+  /* 火焰與蒸氣 */
+  .fire, .steam {
+    position: absolute;
+    font-size: 3rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+    user-select: none;
+    pointer-events: none;
+  }
+  .fire { bottom: -25px; z-index: 5; }
+  .steam { top: 0; z-index: 25; font-size: 4rem; }
+
+  /* 放置感應區 (覆蓋在鍋子上) */
+  .drop-zone {
+    position: absolute;
+    width: 160px;
+    height: 120px;
+    top: 50px;
+    z-index: 30;
+    cursor: pointer;
+    border-radius: 50%;
+  }
+  .drop-zone.hover {
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 20px #ffeb3b;
+  }
+
+  /* 動畫中顯示的食材/料理 */
+  #cooking-item {
+    font-size: 4rem;
+    position: absolute;
+    top: 20px;
+    opacity: 0;
+    transition: all 0.5s;
+    z-index: 15;
+    pointer-events: none;
+  }
+
+  /* ====== 動畫狀態 ====== */
+  .is-cooking .pot-container { animation: shake 0.5s infinite; }
+  .is-cooking .pot-lid { left: 1px; top: 52px; opacity: 1; }
+  .is-cooking .fire { opacity: 1; animation: flicker 0.3s infinite alternate; }
+  .is-cooking .steam { opacity: 0.8; animation: floatUp 1.5s infinite; }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px) rotate(-2deg); }
+    75% { transform: translateX(3px) rotate(2deg); }
+  }
+  @keyframes flicker {
+    from { transform: scale(1); opacity: 0.8; }
+    to { transform: scale(1.2); opacity: 1; }
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(0) scale(0.8); opacity: 0; }
+    50% { opacity: 0.8; }
+    100% { transform: translateY(-50px) scale(1.2); opacity: 0; }
+  }
+  @keyframes popOut {
+    0% { transform: translateY(20px) scale(0); opacity: 0; }
+    60% { transform: translateY(-60px) scale(1.2); opacity: 1; }
+    100% { transform: translateY(-40px) scale(1); opacity: 1; }
+  }
+
+  /* ====== 食材庫 (下方) ====== */
+  .ingredients-area {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    background: #fff9c4;
+    padding: 20px;
+    border-radius: 20px;
+    border: 4px dashed #ffb300;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .ingredient-item {
+    background: white;
+    border-radius: 15px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+    transition: all 0.2s;
+    user-select: none;
+    touch-action: none;
+  }
+
+  .ingredient-item:hover { transform: scale(1.1) translateY(-5px); }
+  
+  .ingredient-item.selected {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 4px #ff5252, 0 10px 20px rgba(0,0,0,0.2);
+  }
+
+  .ingredient-item.used {
+    opacity: 0.3;
+    pointer-events: none;
+    filter: grayscale(100%);
+  }
+
+  .veg-emoji { font-size: 3.5rem; margin-bottom: 5px; }
+  .veg-name { font-size: 1.1rem; font-weight: bold; color: #5d4037; }
+
+  /* 錯誤震動 */
+  .error-shake { animation: errorShake 0.4s; }
+  @keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-10px); }
+    40%, 80% { transform: translateX(10px); }
+  }
+
+  /* ====== 勝利畫面 ====== */
+  #victory-screen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.92);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    text-align: center;
+    backdrop-filter: blur(5px);
+  }
+  #victory-screen h2 { font-size: 4rem; color: #ff5252; margin: 10px; }
+  #victory-screen p { font-size: 2rem; color: #4caf50; font-weight: bold; margin-bottom: 30px; }
+  .btn-restart {
+    font-size: 1.8rem; padding: 15px 40px; background: #ff9800; color: white;
+    border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 8px 15px rgba(255,152,0,0.4);
+    font-weight: bold; font-family: inherit; transition: 0.3s;
+  }
+  .btn-restart:hover { background: #f57c00; transform: scale(1.1); }
+
+  /* 響應式 */
+  @media (max-width: 600px) {
+    h1 { font-size: 2.2rem; }
+    .character { font-size: 4.5rem; }
+    .bubble { font-size: 1.2rem; padding: 10px 15px; }
+    .target-highlight { font-size: 1.5rem; }
+    .ingredients-area { gap: 10px; padding: 15px; }
+    .veg-emoji { font-size: 2.8rem; }
+    .veg-name { font-size: 0.9rem; }
+    .kitchen { transform: scale(0.9); margin-bottom: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <h1>🍲 巧琳的食物遊戲</h1>
+  
+  <div class="game-board">
+    
+    <div class="character-area">
+      <div class="character" id="kid">👦</div>
+      <div class="bubble" id="bubble-text">
+        請幫我把 <span class="target-highlight" id="target-veg">🍆 2.茄子</span> 放進鍋子煮！
+      </div>
+    </div>
+
+    <div class="kitchen" id="kitchen">
+      <div class="steam">💨</div>
+      <div class="pot-lid"></div>
+      
+      <div class="pot-container">
+        <div class="pot-ears"></div>
+        <div class="pot-interior"></div>
+      </div>
+      
+      <div class="fire">🔥🔥</div>
+      <div id="cooking-item"></div>
+      
+      <!-- 感應互動區 -->
+      <div class="drop-zone" id="pot-drop-zone"></div>
+    </div>
+
+    <div class="ingredients-area" id="ingredients-container">
+      <!-- JS 動態生成食材 -->
+    </div>
+
+  </div>
+
+  <div id="victory-screen">
+    <h2>🎉 太棒了！ 🎉</h2>
+    <p>小廚師完成了所有美味料理！</p>
+    <button class="btn-restart" onclick="initGame()">再玩一次</button>
+  </div>
+</div>
+
+<script>
+  // 完美結合 PPT 的資料與合理的食材配對
+  const gameData = [
+    { vegName: '1.番茄', vegEmoji: '🍅', dishName: '番茄義大利麵', dishEmoji: '🍝', id: 'tomato' },
+    { vegName: '2.茄子', vegEmoji: '🍆', dishName: '醬烤茄子', dishEmoji: '🍢', id: 'eggplant' },
+    { vegName: '3.紅蘿蔔', vegEmoji: '🥕', dishName: '咖哩飯', dishEmoji: '🍛', id: 'carrot' },
+    { vegName: '4.南瓜', vegEmoji: '🎃', dishName: '南瓜湯', dishEmoji: '🥣', id: 'pumpkin' },
+    { vegName: '5.花椰菜', vegEmoji: '🥦', dishName: '焗烤花椰菜', dishEmoji: '🥘', id: 'broccoli' },
+    { vegName: '6.玉米', vegEmoji: '🌽', dishName: '玉米濃湯', dishEmoji: '🥣', id: 'corn' }
+  ];
+
+  let currentLevelIndex = 0;
+  let levelSequence = [];
+  let selectedIngredient = null;
+  let draggedIngredient = null;
+  let isAnimating = false;
+
+  const elements = {
+    kid: document.getElementById('kid'),
+    bubbleText: document.getElementById('bubble-text'),
+    ingredientsContainer: document.getElementById('ingredients-container'),
+    kitchen: document.getElementById('kitchen'),
+    dropZone: document.getElementById('pot-drop-zone'),
+    cookingItem: document.getElementById('cooking-item'),
+    victory: document.getElementById('victory-screen')
+  };
+
+  function initGame() {
+    elements.victory.style.display = 'none';
+    isAnimating = false;
+    currentLevelIndex = 0;
+    
+    // 隨機打亂關卡順序
+    levelSequence = [...gameData].sort(() => Math.random() - 0.5);
+    
+    renderIngredients();
+    loadLevel();
+  }
+
+  function renderIngredients() {
+    elements.ingredientsContainer.innerHTML = '';
+    
+    // 底下的按鈕順序也打亂，增加一點尋找的樂趣
+    const shuffledItems = [...gameData].sort(() => Math.random() - 0.5);
+    
+    shuffledItems.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'ingredient-item';
+      el.dataset.id = item.id;
+      
+      el.innerHTML = `
+        <div class="veg-emoji">${item.vegEmoji}</div>
+        <div class="veg-name">${item.vegName}</div>
+      `;
+
+      // 支援點擊
+      el.onclick = () => selectIngredient(el, item);
+      
+      // 支援拖曳
+      el.draggable = true;
+      el.ondragstart = (e) => dragStart(e, el, item);
+      el.ondragend = dragEnd;
+
+      elements.ingredientsContainer.appendChild(el);
+    });
+
+    // 鍋子拖曳事件設定
+    elements.dropZone.ondragover = dragOver;
+    elements.dropZone.ondragleave = dragLeave;
+    elements.dropZone.ondrop = drop;
+    elements.dropZone.onclick = handlePotClick;
+  }
+
+  function loadLevel() {
+    if (currentLevelIndex >= levelSequence.length) {
+      setTimeout(showVictory, 500);
+      return;
+    }
+    
+    const currentTask = levelSequence[currentLevelIndex];
+    elements.kid.innerHTML = '👦'; // 恢復正常男孩表情
+    elements.bubbleText.innerHTML = `請幫我把 <span class="target-highlight">${currentTask.vegEmoji} ${currentTask.vegName}</span> 放進鍋子煮！`;
+    
+    // 清除鍋子顯示的物品
+    elements.cookingItem.style.opacity = '0';
+    elements.cookingItem.style.animation = 'none';
+    selectedIngredient = null;
+    clearSelection();
+  }
+
+  /* ====== 點擊模式邏輯 ====== */
+  function selectIngredient(el, item) {
+    if (isAnimating || el.classList.contains('used')) return;
+    
+    clearSelection();
+    
+    if (selectedIngredient !== el) {
+      el.classList.add('selected');
+      selectedIngredient = el;
+      playBeep();
+    } else {
+      selectedIngredient = null;
+    }
+  }
+
+  function handlePotClick() {
+    if (isAnimating || !selectedIngredient) return;
+    processAttempt(selectedIngredient.dataset.id, selectedIngredient);
+  }
+
+  function clearSelection() {
+    document.querySelectorAll('.ingredient-item').forEach(el => el.classList.remove('selected'));
+  }
+
+  /* ====== 拖曳模式邏輯 ====== */
+  function dragStart(e, el, item) {
+    if (isAnimating || el.classList.contains('used')) {
+      e.preventDefault();
+      return;
+    }
+    draggedIngredient = el;
+    setTimeout(() => el.style.opacity = '0.5', 0);
+  }
+
+  function dragEnd(e) {
+    if(e.target) e.target.style.opacity = '1';
+    draggedIngredient = null;
+  }
+
+  function dragOver(e) {
+    e.preventDefault();
+    if(!isAnimating) elements.dropZone.classList.add('hover');
+  }
+
+  function dragLeave(e) {
+    elements.dropZone.classList.remove('hover');
+  }
+
+  function drop(e) {
+    e.preventDefault();
+    elements.dropZone.classList.remove('hover');
+    if (isAnimating || !draggedIngredient) return;
+    
+    processAttempt(draggedIngredient.dataset.id, draggedIngredient);
+  }
+
+  /* ====== 核心判定與動畫邏輯 ====== */
+  function processAttempt(attemptedId, elementNode) {
+    const currentTask = levelSequence[currentLevelIndex];
+    
+    if (attemptedId === currentTask.id) {
+      // 答對了！開始煮菜
+      elementNode.classList.add('used');
+      elementNode.classList.remove('selected');
+      startCookingAnimation(currentTask);
+    } else {
+      // 答錯了！男孩覺得難吃
+      wrongAnimation();
+    }
+  }
+
+  function wrongAnimation() {
+    if(isAnimating) return;
+    isAnimating = true;
+    
+    playErrorSound();
+    elements.kid.innerHTML = '🤢💦'; // PPT: 男孩覺得難吃
+    elements.kid.classList.add('error-shake');
+    elements.bubbleText.innerHTML = `<span style="color:red">哎呀！放錯蔬菜了！</span>`;
+    
+    setTimeout(() => {
+      elements.kid.classList.remove('error-shake');
+      loadLevel(); // 恢復題目提示
+      isAnimating = false;
+    }, 1500);
+  }
+
+  function startCookingAnimation(task) {
+    isAnimating = true;
+    
+    // 1. 放入食材 (先顯示蔬菜掉進去)
+    elements.cookingItem.innerHTML = task.vegEmoji;
+    elements.cookingItem.style.opacity = '1';
+    elements.cookingItem.style.transform = 'translateY(10px) scale(0.5)';
+    
+    playPlopSound();
+
+    setTimeout(() => {
+      // 2. 啟動烹飪特效 (蓋蓋子、火、蒸氣)
+      elements.cookingItem.style.opacity = '0';
+      elements.kitchen.classList.add('is-cooking');
+      elements.bubbleText.innerHTML = `咕嚕咕嚕... 煮飯中！🔥`;
+      playSizzleSound();
+      
+      setTimeout(() => {
+        // 3. 料理完成蹦出來！
+        elements.kitchen.classList.remove('is-cooking');
+        elements.cookingItem.innerHTML = task.dishEmoji;
+        elements.cookingItem.style.animation = 'popOut 0.8s forwards';
+        
+        // 4. 男孩開心吃飯
+        elements.kid.innerHTML = '😋✨'; // PPT: 男孩吃飯
+        elements.bubbleText.innerHTML = `太香了！變成了 <span class="target-highlight">${task.dishName}</span>！`;
+        playSuccessSound();
+
+        setTimeout(() => {
+          // 進入下一題
+          currentLevelIndex++;
+          isAnimating = false;
+          loadLevel();
+        }, 2500);
+
+      }, 1500); // 煮 1.5 秒
+    }, 500);
+  }
+
+  /* ====== 勝利畫面 ====== */
+  function showVictory() {
+    elements.victory.style.display = 'flex';
+    playWinSound();
+  }
+
+  /* ====== 網頁原生合成音效 (無需外部載入) ====== */
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  let audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) audioCtx = new AudioContext();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+
+  function playBeep() {
+    try {
+      const ctx = getAudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.setValueAtTime(600, ctx.currentTime);
+      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + 0.1);
+    } catch(e){}
+  }
+
+  function playPlopSound() {
+    try {
+      const ctx = getAudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(300, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + 0.15);
+    } catch(e){}
+  }
+
+  function playSizzleSound() {
+    try {
+      const ctx = getAudioCtx();
+      const bufferSize = ctx.sampleRate * 1.5; // 1.5 seconds
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1; // white noise
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 1000;
+      
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.05, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.5);
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.5);
+
+      noise.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+      noise.start();
+    } catch(e){}
+  }
+
+  function playSuccessSound() {
+    try {
+      const ctx = getAudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(400, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + 0.5);
+    } catch(e){}
+  }
+
+  function playErrorSound() {
+    try {
+      const ctx = getAudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(150, ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.3);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(); osc.stop(ctx.currentTime + 0.3);
+    } catch(e){}
+  }
+
+  function playWinSound() {
+    try {
+      const ctx = getAudioCtx();
+      const notes = [523.25, 659.25, 783.99, 1046.50]; // C E G C
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + i * 0.15 + 0.3);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + i * 0.15);
+        osc.stop(ctx.currentTime + i * 0.15 + 0.3);
+      });
+    } catch(e){}
+  }
+
+  // 啟動遊戲
+  window.onload = initGame;
+</script>
+
+</body>
+</html>

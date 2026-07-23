@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>幼兒交通工具分類遊戲</title>
+    <style>
+        :root {
+            --primary: #FF9800;      /* 溫暖活潑的橘色 */
+            --bg-color: #FFF3E0;
+            --text-main: #424242;
+            --zone-road: #E3F2FD;    /* 淺藍 - 路上 */
+            --zone-rail: #F5F5F5;    /* 淺灰 - 鐵路 */
+            --zone-sky: #E1F5FE;     /* 天空藍 - 天上 */
+            --zone-water: #E0F7FA;   /* 水藍 - 水裡 */
+            --zone-rescue: #FFEBEE;  /* 淺紅 - 救援 */
+            --border-radius: 20px;   /* 更圓潤的邊角 */
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', '微軟正黑體', 'PingFang TC', sans-serif;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: none;
+            background-image: radial-gradient(#FFCC80 10%, transparent 11%), radial-gradient(#FFCC80 10%, transparent 11%);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            height: 100vh;
+            max-height: 900px;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            border-radius: 0;
+        }
+
+        @media (min-width: 900px) {
+            .container {
+                height: 95vh;
+                border-radius: 30px;
+                border: 4px solid #FFB74D;
+            }
+        }
+
+        /* 畫面切換 */
+        .screen {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* 首頁與結束畫面 */
+        h1 {
+            color: #E65100;
+            margin-bottom: 20px;
+            font-size: 36px;
+            text-shadow: 2px 2px 0px #FFE0B2;
+        }
+
+        p.desc {
+            color: #5D4037;
+            font-size: 22px;
+            margin-bottom: 40px;
+            line-height: 1.5;
+            font-weight: bold;
+        }
+
+        button {
+            background-color: #FF5722;
+            color: white;
+            border: 4px solid #E64A19;
+            padding: 15px 50px;
+            font-size: 28px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 6px 0 #D84315, 0 10px 10px rgba(0,0,0,0.2);
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            background-color: #FF7043;
+        }
+
+        button:active {
+            transform: translateY(6px);
+            box-shadow: 0 0 0 #D84315, 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* 遊戲畫面頭部 */
+        .game-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: #FF9800;
+            color: white;
+            border-radius: 26px 26px 0 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.4);
+            z-index: 10;
+        }
+
+        @media (max-width: 900px) {
+            .game-header { border-radius: 0 0 20px 20px; }
+        }
+
+        .timer {
+            font-size: 26px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress {
+            font-size: 22px;
+            font-weight: bold;
+            background: white;
+            color: #FF9800;
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        .categories-title {
+            margin-top: 80px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #F57C00;
+            margin-bottom: 20px;
+        }
+
+        /* 分類方塊區 */
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            width: 100%;
+            padding: 0 15px;
+        }
+
+        @media (max-width: 768px) {
+            .categories {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .categories .category:nth-child(4), 
+            .categories .category:nth-child(5) {
+                grid-column: span 1.5;
+            }
+        }
+
+        .category {
+            padding: 15px 5px;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+            font-size: 22px;
+            border: 4px dashed #ccc;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 140px;
+        }
+
+        .category .emoji {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .category[data-type="路上"] { background: var(--zone-road); border-color: #64B5F6; color: #1976D2; }
+        .category[data-type="軌道"] { background: var(--zone-rail); border-color: #9E9E9E; color: #424242; }
+        .category[data-type="天空"] { background: var(--zone-sky); border-color: #4FC3F7; color: #0288D1; }
+        .category[data-type="水裡"] { background: var(--zone-water); border-color: #4DD0E1; color: #0097A7; }
+        .category[data-type="救援"] { background: var(--zone-rescue); border-color: #E57373; color: #D32F2F; }
+
+        /* 拖曳區 */
+        .item-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            position: relative;
+        }
+
+        .item-placeholder {
+            width: 220px;
+            height: 100px;
+            border: 4px dashed #FFCC80;
+            border-radius: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #FFB74D;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .draggable-item {
+            position: absolute;
+            width: 220px;
+            height: 100px;
+            background: white;
+            border-radius: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px; 
+            font-weight: bold;
+            color: var(--text-main);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            border: 5px solid #FF9800;
+            cursor: grab;
+            touch-action: none;
+            z-index: 100;
+            gap: 10px;
+        }
+
+        .draggable-item.dragging {
+            box-shadow: 0 20px 30px rgba(0,0,0,0.3);
+            opacity: 0.95;
+            cursor: grabbing;
+            transform: scale(1.1) !important;
+        }
+
+        /* 動畫 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            20%, 60% { transform: translateX(-15px) rotate(-5deg); }
+            40%, 80% { transform: translateX(15px) rotate(5deg); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+            border-color: #F44336 !important;
+            background-color: #FFEBEE !important;
+        }
+
+        .correct-flash {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(76, 175, 80, 0.8);
+            border-color: #4CAF50 !important;
+            background-color: #E8F5E9 !important;
+        }
+
+        .wrong-flash {
+            transform: scale(0.9);
+            box-shadow: 0 0 20px rgba(244, 67, 54, 0.8);
+        }
+
+        /* 結算畫面 */
+        .time-result-box {
+            background-color: #FFF3E0;
+            padding: 30px 50px;
+            border-radius: 30px;
+            border: 5px solid #FF9800;
+            margin: 30px 0;
+            box-shadow: 0 10px 20px rgba(255, 152, 0, 0.2);
+        }
+
+        .time-result-label {
+            font-size: 24px;
+            color: #E65100;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .final-time-text {
+            font-size: 60px;
+            font-weight: bold;
+            color: #D84315;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 2px 2px 0px white;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 首頁畫面 -->
+    <div id="start-screen" class="screen active">
+        <h1>🚕 交通工具回我家 🚁</h1>
+        <p class="desc">
+            小朋友，請幫忙把這些車車和飛機<br>
+            拖曳送到它們最常出現的地方喔！<br>
+            （馬路、鐵軌、天空、水裡、救援）
+        </p>
+        <button onclick="startGame()">▶️ 開始遊戲</button>
+    </div>
+
+    <!-- 遊戲畫面 -->
+    <div id="game-screen" class="screen">
+        <div class="game-header">
+            <div class="timer">⏱️ <span id="timer">00:00</span></div>
+            <div class="progress" id="progress">剩餘: 0</div>
+        </div>
+        
+        <div class="categories-title">🌟 請把交通工具拉到正確的家 🌟</div>
+        
+        <div class="categories" id="categories">
+            <div class="category" data-type="路上"><div class="emoji">🛣️</div>馬路上</div>
+            <div class="category" data-type="軌道"><div class="emoji">🛤️</div>鐵軌上</div>
+            <div class="category" data-type="天空"><div class="emoji">☁️</div>天空上</div>
+            <div class="category" data-type="水裡"><div class="emoji">🌊</div>水裡面</div>
+            <div class="category" data-type="救援"><div class="emoji">🚨</div>急救救援</div>
+        </div>
+
+        <div class="item-area">
+            <div class="item-placeholder">把上面積木放進去</div>
+            <div id="current-item-container"></div>
+        </div>
+    </div>
+
+    <!-- 結束畫面 -->
+    <div id="end-screen" class="screen">
+        <h1>🏆 太棒了！過關！ 🏆</h1>
+        <p class="desc">你把所有的交通工具都送回家了！<br>你是最棒的小幫手！</p>
+        
+        <div class="time-result-box">
+            <div class="time-result-label">🕒 你的挑戰時間是</div>
+            <div class="final-time-text" id="final-time">00:00</div>
+        </div>
+        
+        <button onclick="resetGame()">🔄 再玩一次</button>
+    </div>
+</div>
+
+<script>
+    // 幼兒友善題庫 (圖案 + 文字)
+    const subjectsData = [
+        { name: "🚗 汽車", category: "路上" },
+        { name: "🚌 公車", category: "路上" },
+        { name: "🛵 機車", category: "路上" },
+        { name: "🚲 腳踏車", category: "路上" },
+        
+        { name: "🚂 火車", category: "軌道" },
+        { name: "🚅 高鐵", category: "軌道" },
+        { name: "🚈 捷運", category: "軌道" },
+        
+        { name: "✈️ 飛機", category: "天空" },
+        { name: "🚁 直升機", category: "天空" },
+        { name: "🎈 熱氣球", category: "天空" },
+        
+        { name: "🛳️ 輪船", category: "水裡" },
+        { name: "⛵ 帆船", category: "水裡" },
+        { name: "🚤 快艇", category: "水裡" },
+        { name: "⛴️ 渡輪", category: "水裡" },
+        
+        { name: "🚓 警車", category: "救援" },
+        { name: "🚒 消防車", category: "救援" },
+        { name: "🚑 救護車", category: "救援" }
+    ];
+
+    let remainingItems = [];
+    let startTime;
+    let timerInterval;
+    let currentElement = null;
+
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const endScreen = document.getElementById('end-screen');
+    const timerDisplay = document.getElementById('timer');
+    const progressDisplay = document.getElementById('progress');
+    const itemContainer = document.getElementById('current-item-container');
+    const finalTimeDisplay = document.getElementById('final-time');
+
+    function shuffle(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    function showScreen(screen) {
+        startScreen.classList.remove('active');
+        gameScreen.classList.remove('active');
+        endScreen.classList.remove('active');
+        screen.classList.add('active');
+    }
+
+    function startGame() {
+        remainingItems = shuffle([...subjectsData]);
+        showScreen(gameScreen);
+        
+        startTime = Date.now();
+        timerDisplay.innerText = "00:00";
+        timerInterval = setInterval(updateTimer, 1000);
+        
+        loadNextItem();
+    }
+
+    function updateTimer() {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const minutes = String(Math.floor(elapsed / 60)).padStart(2, '0');
+        const seconds = String(elapsed % 60).padStart(2, '0');
+        timerDisplay.innerText = `${minutes}:${seconds}`;
+    }
+
+    function loadNextItem() {
+        if (remainingItems.length === 0) {
+            endGame();
+            return;
+        }
+
+        const itemData = remainingItems.pop();
+        progressDisplay.innerText = `剩餘 ${remainingItems.length + 1} 個`;
+
+        itemContainer.innerHTML = '';
+        currentElement = document.createElement('div');
+        currentElement.className = 'draggable-item';
+        currentElement.innerText = itemData.name;
+        currentElement.dataset.category = itemData.category;
+        
+        itemContainer.appendChild(currentElement);
+        setupDrag(currentElement);
+    }
+
+    function setupDrag(el) {
+        let isDragging = false;
+        let startX, startY;
+        let currentX = 0, currentY = 0;
+
+        el.addEventListener('pointerdown', (e) => {
+            isDragging = true;
+            el.setPointerCapture(e.pointerId);
+            startX = e.clientX - currentX;
+            startY = e.clientY - currentY;
+            el.style.transition = 'none'; 
+            el.classList.add('dragging');
+            el.style.transform = `translate(${currentX}px, ${currentY}px) scale(1.1)`;
+        });
+
+        el.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+            currentX = e.clientX - startX;
+            currentY = e.clientY - startY;
+            el.style.transform = `translate(${currentX}px, ${currentY}px) scale(1.1)`;
+        });
+
+        el.addEventListener('pointerup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            el.releasePointerCapture(e.pointerId);
+            el.classList.remove('dragging');
+
+            el.style.display = 'none';
+            const elemBelow = document.elementFromPoint(e.clientX, e.clientY);
+            el.style.display = 'flex';
+
+            const dropZone = elemBelow ? elemBelow.closest('.category') : null;
+
+            if (dropZone) {
+                const targetCategory = dropZone.dataset.type;
+                if (targetCategory === el.dataset.category) {
+                    // 答對了
+                    dropZone.classList.add('correct-flash');
+                    setTimeout(() => dropZone.classList.remove('correct-flash'), 500);
+                    
+                    el.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease';
+                    el.style.transform = `translate(${currentX}px, ${currentY}px) scale(0)`;
+                    el.style.opacity = '0';
+                    
+                    setTimeout(loadNextItem, 400);
+                } else {
+                    // 答錯了
+                    dropZone.classList.add('wrong-flash');
+                    setTimeout(() => dropZone.classList.remove('wrong-flash'), 500);
+                    wrongAnswer(el);
+                }
+            } else {
+                wrongAnswer(el);
+            }
+        });
+        
+        function wrongAnswer(element) {
+            element.style.transition = 'transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            currentX = 0;
+            currentY = 0;
+            element.style.transform = `translate(0px, 0px) scale(1)`;
+            
+            element.classList.add('shake');
+            setTimeout(() => {
+                element.classList.remove('shake');
+            }, 500);
+        }
+    }
+
+    function endGame() {
+        clearInterval(timerInterval);
+        finalTimeDisplay.innerText = timerDisplay.innerText;
+        showScreen(endScreen);
+    }
+
+    function resetGame() {
+        showScreen(startScreen);
+    }
+
+</script>
+
+</body>
+</html>

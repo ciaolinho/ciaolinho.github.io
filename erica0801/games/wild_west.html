@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>自然冒險家 - 雙人對戰</title>
+    <style>
+        /* 基礎變數與重置 */
+        :root {
+            --bg-color: #FFF3E0;
+            --p1-color: #FF5722;
+            --p1-light: #FFCCBC;
+            --p2-color: #2196F3;
+            --p2-light: #BBDEFB;
+            --success-color: #4CAF50;
+            --wrong-color: #F44336;
+            --text-dark: #3E2723;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        /* 遊戲主容器 */
+        #game-app {
+            background-color: white;
+            width: 100%;
+            max-width: 900px;
+            height: 100vh;
+            max-height: 600px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 901px) {
+            #game-app { height: 85vh; border: 4px solid #FFE0B2; }
+        }
+
+        /* 畫面切換 */
+        .screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: white;
+            z-index: 20;
+        }
+
+        .screen.active {
+            display: flex;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        /* 標題與按鈕 */
+        .title-emoji { font-size: 70px; margin-bottom: 10px; animation: bounce 2s infinite; }
+        .title-text { font-size: 36px; color: var(--text-dark); font-weight: bold; margin-bottom: 15px; }
+        .subtitle { font-size: 18px; color: #5D4037; margin-bottom: 30px; line-height: 1.5; }
+
+        .btn {
+            background-color: #FF9800;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #F57C00;
+            transition: all 0.1s;
+        }
+        .btn:active { transform: translateY(6px); box-shadow: 0 0 0 #F57C00; }
+
+        /* --- 遊戲進行畫面 --- */
+        .task-banner {
+            width: 100%;
+            height: 80px;
+            background-color: #FFF9C4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 10;
+            border-bottom: 3px solid #FBC02D;
+        }
+        .task-text { font-size: 24px; font-weight: bold; color: #333; margin: 0 15px; }
+        .speak-btn {
+            background: #FFCA28; border: none; border-radius: 50%;
+            width: 45px; height: 45px; font-size: 22px; cursor: pointer; box-shadow: 0 3px 0 #FFA000;
+        }
+        .speak-btn:active { transform: translateY(3px); box-shadow: 0 0 0 #FFA000; }
+
+        /* 對戰區 */
+        .battle-arena {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            padding-top: 80px; /* 留給頂部任務列 */
+            position: relative;
+        }
+        
+        /* 中間分隔線 */
+        .divider {
+            position: absolute;
+            left: 50%; top: 80px; bottom: 0;
+            width: 6px;
+            background-color: #EEEEEE;
+            transform: translateX(-50%);
+            z-index: 5;
+            border-radius: 5px;
+        }
+
+        .player-board {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            position: relative;
+        }
+        .p1-board { background-color: #FFF; }
+        .p2-board { background-color: #FAFAFA; }
+
+        /* 玩家狀態列 */
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .p1-header { background-color: var(--p1-light); color: #BF360C; border: 2px solid var(--p1-color); }
+        .p2-header { background-color: var(--p2-light); color: #0D47A1; border: 2px solid var(--p2-color); }
+
+        .score-display { display: flex; gap: 5px; }
+        .star { font-size: 20px; filter: grayscale(100%); opacity: 0.3; }
+        .star.active { filter: grayscale(0%); opacity: 1; animation: popIn 0.3s; }
+
+        /* 卡片網格 */
+        .cards-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            align-items: center;
+            justify-items: center;
+        }
+        
+        .fruit-card {
+            background-color: white;
+            border: 3px solid #E0E0E0;
+            border-radius: 12px;
+            width: 100%;
+            height: 100%;
+            max-width: 70px;
+            max-height: 85px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 45px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.1s;
+        }
+
+        /* 玩家一 (紅) 的卡片狀態 */
+        .p1-card.selected { border-color: var(--p1-color); background-color: #FBE9E7; transform: scale(1.05); box-shadow: 0 0 10px rgba(255,87,34,0.5); }
+        /* 玩家二 (藍) 的卡片狀態 */
+        .p2-card.selected { border-color: var(--p2-color); background-color: #E3F2FD; transform: scale(1.05); box-shadow: 0 0 10px rgba(33,150,243,0.5); }
+        
+        .fruit-card.correct { border-color: var(--success-color) !important; background-color: #E8F5E9 !important; animation: pop 0.4s ease; }
+        .fruit-card.wrong { border-color: var(--wrong-color) !important; background-color: #FFEBEE !important; animation: shake 0.4s ease; }
+
+        /* 覆蓋層 (答錯時鎖定畫面用) */
+        .lock-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            z-index: 10;
+            border-radius: 15px;
+        }
+
+        /* 橫向提示 */
+        .rotate-hint {
+            display: none;
+            position: absolute;
+            bottom: 10px; left: 50%; transform: translateX(-50%);
+            font-size: 14px; color: #888;
+        }
+        @media (orientation: portrait) and (max-width: 600px) {
+            .rotate-hint { display: block; }
+        }
+
+        /* 動畫 */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes popIn { 0% { transform: scale(0); } 70% { transform: scale(1.5); } 100% { transform: scale(1); } }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+        /* 碎紙花 */
+        #confetti { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; overflow: hidden; display: none; }
+        .piece { position: absolute; width: 12px; height: 12px; opacity: 0.8; animation: fall linear forwards; }
+        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
+
+    </style>
+</head>
+<body>
+
+<div id="game-app">
+    <!-- 標題畫面 -->
+    <div id="screen-start" class="screen active">
+        <div class="title-emoji">🐯🆚🐻</div>
+        <h1 class="title-text">任務卡：雙人對戰</h1>
+        <div class="subtitle">
+            一人一邊，聽關主唸任務！<br>
+            最快在自己的區域找出指定果實的人得分。<br>
+            先拿到 <strong>5</strong> 顆星星的隊伍獲勝！
+        </div>
+        <button class="btn" onclick="startGame()">開始對戰</button>
+        <div class="rotate-hint">建議將手機/平板「橫向放置」遊玩喔！</div>
+    </div>
+
+    <!-- 遊戲畫面 -->
+    <div id="screen-game" class="screen" style="padding: 0; background: transparent;">
+        <!-- 中央任務列 -->
+        <div class="task-banner">
+            <button class="speak-btn" onclick="speakTask()">📢</button>
+            <div class="task-text" id="task-text">準備中...</div>
+        </div>
+
+        <div class="battle-arena">
+            <div class="divider"></div>
+            
+            <!-- 玩家一 (左) -->
+            <div class="player-board p1-board">
+                <div class="player-header p1-header">
+                    <span>🐯 老虎隊</span>
+                    <div class="score-display" id="p1-score-display">
+                        <span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span>
+                    </div>
+                </div>
+                <div class="cards-grid" id="p1-cards"></div>
+                <div class="lock-overlay" id="p1-lock">❌ 暫停中</div>
+            </div>
+
+            <!-- 玩家二 (右) -->
+            <div class="player-board p2-board">
+                <div class="player-header p2-header">
+                    <span>🐻 熊熊隊</span>
+                    <div class="score-display" id="p2-score-display">
+                        <span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span><span class="star">⭐</span>
+                    </div>
+                </div>
+                <div class="cards-grid" id="p2-cards"></div>
+                <div class="lock-overlay" id="p2-lock">❌ 暫停中</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 結算畫面 -->
+    <div id="screen-end" class="screen">
+        <div id="confetti"></div>
+        <div class="title-emoji" id="winner-emoji">🏆</div>
+        <h1 class="title-text" id="winner-text">獲勝！</h1>
+        <p class="subtitle">你們都是超級厲害的自然冒險家！</p>
+        <button class="btn" onclick="returnToTitle()">再比一次</button>
+    </div>
+</div>
+
+<script>
+    // --- 1. 遊戲資料庫 (完全依照 Emoji 視覺特徵重新分類) ---
+    const fruits = [
+        { id: 1, emoji: '🍎', color: 'red', shape: 'round', name: '蘋果' },
+        { id: 2, emoji: '🍓', color: 'red', shape: 'other', name: '草莓' },
+        { id: 3, emoji: '🍒', color: 'red', shape: 'round', name: '櫻桃' },
+        { id: 4, emoji: '🍉', color: 'red', shape: 'other', name: '西瓜' }, // 視覺為紅果肉
+        { id: 5, emoji: '🍑', color: 'red', shape: 'round', name: '水蜜桃' },
+        { id: 6, emoji: '🍌', color: 'yellow', shape: 'long', name: '香蕉' },
+        { id: 7, emoji: '🍋', color: 'yellow', shape: 'oval', name: '檸檬' },
+        { id: 8, emoji: '🍍', color: 'yellow', shape: 'oval', name: '鳳梨' },
+        { id: 9, emoji: '🥭', color: 'yellow', shape: 'oval', name: '芒果' },
+        { id: 10, emoji: '🍊', color: 'yellow', shape: 'round', name: '橘子' }, // 歸類至黃色系
+        { id: 11, emoji: '🍏', color: 'green', shape: 'round', name: '青蘋果' },
+        { id: 12, emoji: '🥑', color: 'green', shape: 'oval', name: '酪梨' },
+        { id: 13, emoji: '🍈', color: 'green', shape: 'round', name: '哈密瓜' },
+        { id: 14, emoji: '🥝', color: 'green', shape: 'round', name: '奇異果' }, // 視覺為綠果肉
+        { id: 15, emoji: '🍇', color: 'purple', shape: 'round', name: '葡萄' },
+        { id: 16, emoji: '🌰', color: 'brown', shape: 'other', name: '栗子' },
+        { id: 17, emoji: '🥥', color: 'brown', shape: 'round', name: '椰子' },
+        { id: 18, emoji: '🥜', color: 'brown', shape: 'oval', name: '花生' }
+    ];
+
+    // --- 2. 任務題庫 (移除容易混淆的「有籽」，專注於直觀的顏色與形狀) ---
+    const taskTemplates = [
+        { text: "找到 {n} 個【紅色】果實", speech: "請找到 {n} 個紅色的果實", filter: f => f.color === 'red' },
+        { text: "找到 {n} 個【黃色或橘色】", speech: "請找到 {n} 個黃色或橘色的果實", filter: f => f.color === 'yellow' },
+        { text: "找到 {n} 個【綠色】果實", speech: "請找到 {n} 個綠色的果實", filter: f => f.color === 'green' },
+        { text: "找到 {n} 個【咖啡色】果實", speech: "請找到 {n} 個咖啡色的果實", filter: f => f.color === 'brown' },
+        { text: "找到 {n} 個【圓形】果實", speech: "請找到 {n} 個圓形的果實", filter: f => f.shape === 'round' },
+        { text: "找到 {n} 個【長長或橢圓】", speech: "請找到 {n} 個長長或橢圓形的果實", filter: f => f.shape === 'long' || f.shape === 'oval' }
+    ];
+
+    // --- 3. 玩家狀態管理 ---
+    const WIN_SCORE = 5;
+    let currentTask = null;
+    let isRoundActive = false;
+
+    let p1 = { id: 'p1', name: '老虎隊🐯', score: 0, selectedCards: [], isLocked: false };
+    let p2 = { id: 'p2', name: '熊熊隊🐻', score: 0, selectedCards: [], isLocked: false };
+
+    // 工具：陣列洗牌
+    function shuffle(array) {
+        let arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // UI 切換
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    // 語音
+    function speak(text) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-TW';
+            utterance.rate = 0.9; 
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+    function speakTask() { if(currentTask) speak(currentTask.speech); }
+
+    // 更新星星分數
+    function updateScoreDisplay(player) {
+        const stars = document.getElementById(`${player.id}-score-display`).children;
+        for(let i=0; i<WIN_SCORE; i++) {
+            if(i < player.score) stars[i].classList.add('active');
+            else stars[i].classList.remove('active');
+        }
+    }
+
+    // --- 4. 遊戲流程 ---
+
+    function startGame() {
+        p1.score = 0; p2.score = 0;
+        updateScoreDisplay(p1); updateScoreDisplay(p2);
+        showScreen('screen-game');
+        if ('speechSynthesis' in window) window.speechSynthesis.speak(new SpeechSynthesisUtterance(''));
+        startNewRound();
+    }
+
+    function startNewRound() {
+        isRoundActive = true;
+        p1.selectedCards = []; p1.isLocked = false;
+        p2.selectedCards = []; p2.isLocked = false;
+        document.getElementById('p1-lock').style.display = 'none';
+        document.getElementById('p2-lock').style.display = 'none';
+
+        // 產生任務 (需要數量2~3)
+        const template = taskTemplates[Math.floor(Math.random() * taskTemplates.length)];
+        const requiredCount = Math.floor(Math.random() * 2) + 2; 
+        
+        currentTask = {
+            count: requiredCount,
+            text: template.text.replace('{n}', requiredCount),
+            speech: template.speech.replace('{n}', requiredCount),
+            filter: template.filter
+        };
+
+        document.getElementById('task-text').innerText = currentTask.text;
+
+        // 產生基礎牌組 (保證有足夠的正確答案，總共12張牌)
+        let validFruits = shuffle(fruits.filter(currentTask.filter));
+        let deck = [];
+        
+        // 放入正確的果實
+        for(let i=0; i<currentTask.count; i++) deck.push(validFruits[i % validFruits.length]);
+        
+        // 隨機放入其他果實補滿 12 張
+        while(deck.length < 12) {
+            let randomFruit = fruits[Math.floor(Math.random() * fruits.length)];
+            // 避免塞入太多正確答案，讓遊戲有挑戰性
+            if (!currentTask.filter(randomFruit) || Math.random() > 0.5) {
+                deck.push(randomFruit);
+            }
+        }
+
+        // 雙方拿到相同的卡片組成，但打亂順序
+        renderBoard(p1, shuffle(deck));
+        renderBoard(p2, shuffle(deck));
+
+        setTimeout(() => speakTask(), 300);
+    }
+
+    // 繪製玩家卡片區
+    function renderBoard(player, deck) {
+        const container = document.getElementById(`${player.id}-cards`);
+        container.innerHTML = '';
+        
+        deck.forEach(fruit => {
+            const card = document.createElement('div');
+            card.className = `fruit-card ${player.id}-card`;
+            card.innerText = fruit.emoji;
+            card.onclick = () => handleCardClick(player, card, fruit);
+            container.appendChild(card);
+        });
+    }
+
+    // 處理點擊卡片
+    function handleCardClick(player, cardElement, fruitData) {
+        if (!isRoundActive || player.isLocked) return;
+
+        const isSelected = cardElement.classList.contains('selected');
+
+        if (isSelected) {
+            // 取消選取
+            cardElement.classList.remove('selected');
+            player.selectedCards = player.selectedCards.filter(c => c.element !== cardElement);
+        } else {
+            // 最多選到任務要求的數量
+            if (player.selectedCards.length >= currentTask.count) return;
+            
+            cardElement.classList.add('selected');
+            player.selectedCards.push({ element: cardElement, data: fruitData });
+        }
+
+        // 檢查是否選滿
+        if (player.selectedCards.length === currentTask.count) {
+            checkPlayerAnswer(player);
+        }
+    }
+
+    function checkPlayerAnswer(player) {
+        const allCorrect = player.selectedCards.every(card => currentTask.filter(card.data));
+
+        if (allCorrect) {
+            // 該玩家獲勝！
+            isRoundActive = false; // 鎖定全局，另一位玩家不能按了
+            speak(`恭喜${player.name}得分！`);
+            
+            player.selectedCards.forEach(c => c.element.classList.add('correct'));
+            player.score++;
+            updateScoreDisplay(player);
+
+            setTimeout(() => {
+                if (player.score >= WIN_SCORE) endGame(player);
+                else startNewRound();
+            }, 2000);
+
+        } else {
+            // 答錯，觸發懲罰 (鎖定1.5秒)
+            player.isLocked = true;
+            document.getElementById(`${player.id}-lock`).style.display = 'flex';
+            
+            player.selectedCards.forEach(c => {
+                if (!currentTask.filter(c.data)) c.element.classList.add('wrong');
+            });
+            
+            // 語音提示
+            speak("哎呀，挑錯囉！");
+
+            setTimeout(() => {
+                player.selectedCards.forEach(c => c.element.classList.remove('selected', 'wrong'));
+                player.selectedCards = [];
+                player.isLocked = false;
+                document.getElementById(`${player.id}-lock`).style.display = 'none';
+            }, 1500);
+        }
+    }
+
+    // --- 5. 結束與特效 ---
+
+    function endGame(winner) {
+        showScreen('screen-end');
+        document.getElementById('winner-emoji').innerText = winner.id === 'p1' ? '🐯' : '🐻';
+        document.getElementById('winner-text').innerText = `${winner.name} 獲勝！`;
+        document.getElementById('winner-text').style.color = winner.id === 'p1' ? 'var(--p1-color)' : 'var(--p2-color)';
+        
+        speak(`${winner.name} 贏得了比賽！太棒了！`);
+        startConfetti();
+    }
+
+    function returnToTitle() {
+        stopConfetti();
+        showScreen('screen-start');
+    }
+
+    function startConfetti() {
+        const container = document.getElementById('confetti');
+        container.style.display = 'block';
+        container.innerHTML = '';
+        const colors = ['#FFC107', '#4CAF50', '#2196F3', '#f44336', '#9C27B0'];
+        
+        for (let i = 0; i < 80; i++) {
+            setTimeout(() => {
+                if (container.style.display === 'block') {
+                    const piece = document.createElement('div');
+                    piece.className = 'piece';
+                    piece.style.left = Math.random() * 100 + 'vw';
+                    piece.style.top = '-20px';
+                    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    const duration = 2 + Math.random() * 3;
+                    piece.style.animation = `fall ${duration}s linear forwards`;
+                    container.appendChild(piece);
+                    setTimeout(() => piece.remove(), duration * 1000);
+                }
+            }, i * 50);
+        }
+    }
+
+    function stopConfetti() {
+        document.getElementById('confetti').style.display = 'none';
+        document.getElementById('confetti').innerHTML = '';
+    }
+
+</script>
+</body>
+</html>

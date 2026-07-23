@@ -1,0 +1,140 @@
+[
+  {
+    "original_name": "首頁",
+    "filename": "games/home_game.html",
+    "title": "森林運動會：球球特攻隊 (首頁)",
+    "icon": "fa-basketball"
+  },
+  {
+    "original_name": "幼兒運動評估",
+    "filename": "games/exercise_assessment.html",
+    "title": "幼兒運動評估",
+    "icon": "fa-stethoscope"
+  },
+  {
+    "original_name": "班級管理",
+    "filename": "games/class_management.html",
+    "title": "班級管理",
+    "icon": "fa-users-gear"
+  },
+  {
+    "original_name": "untitled-page",
+    "filename": "games/untitled.html",
+    "title": "未命名頁面",
+    "icon": "fa-file-lines"
+  },
+  {
+    "original_name": "皂肥皂steam",
+    "filename": "games/soap_steam.html",
+    "title": "皂肥皂 STEAM",
+    "icon": "fa-soap"
+  },
+  {
+    "original_name": "steam",
+    "filename": "games/steam.html",
+    "title": "STEAM 課程",
+    "icon": "fa-cubes"
+  },
+  {
+    "original_name": "剪刀石頭布猜拳遊戲",
+    "filename": "games/rock_paper_scissors.html",
+    "title": "剪刀石頭布猜拳遊戲",
+    "icon": "fa-hand-back-fist"
+  },
+  {
+    "original_name": "太空小英雄-雷達鎖定與殞石清除",
+    "filename": "games/space_hero.html",
+    "title": "太空小英雄：雷達鎖定與殞石清除",
+    "icon": "fa-rocket"
+  },
+  {
+    "original_name": "動物點名與彩色泡泡彈",
+    "filename": "games/animal_call.html",
+    "title": "動物點名與彩色泡泡彈",
+    "icon": "fa-paw"
+  },
+  {
+    "original_name": "追打馬年獸",
+    "filename": "games/chase_beast.html",
+    "title": "追打馬年獸",
+    "icon": "fa-dragon"
+  },
+  {
+    "original_name": "文具失蹤案",
+    "filename": "games/stationery.html",
+    "title": "文具失蹤案",
+    "icon": "fa-pen-clip"
+  },
+  {
+    "original_name": "交通工具",
+    "filename": "games/vehicles.html",
+    "title": "交通工具",
+    "icon": "fa-car-side"
+  },
+  {
+    "original_name": "妙廚遊戲",
+    "filename": "games/chef.html",
+    "title": "妙廚遊戲",
+    "icon": "fa-utensils"
+  },
+  {
+    "original_name": "自然探險家",
+    "filename": "games/nature_explorer.html",
+    "title": "自然探險家",
+    "icon": "fa-compass"
+  },
+  {
+    "original_name": "漢堡屋角色扮演",
+    "filename": "games/burger_house.html",
+    "title": "漢堡屋角色扮演",
+    "icon": "fa-burger"
+  },
+  {
+    "original_name": "小主人理財大挑戰我的夢想玩具屋",
+    "filename": "games/money_challenge.html",
+    "title": "小主人理財大挑戰：我的夢想玩具屋",
+    "icon": "fa-piggy-bank"
+  },
+  {
+    "original_name": "小小醫師大冒險",
+    "filename": "games/little_doctor.html",
+    "title": "小小醫師大冒險",
+    "icon": "fa-user-doctor"
+  },
+  {
+    "original_name": "注音學習遊戲",
+    "filename": "games/bopomofo_learning.html",
+    "title": "注音學習遊戲",
+    "icon": "fa-graduation-cap"
+  },
+  {
+    "original_name": "注音卡牌遊戲",
+    "filename": "games/bopomofo_cards.html",
+    "title": "注音卡牌遊戲",
+    "icon": "fa-address-card"
+  },
+  {
+    "original_name": "卡牌遊戲",
+    "filename": "games/card_game.html",
+    "title": "卡牌遊戲",
+    "icon": "fa-clone"
+  },
+  {
+    "original_name": "小小園丁",
+    "filename": "games/little_gardener.html",
+    "title": "小小園丁",
+    "icon": "fa-seedling"
+  },
+  {
+    "original_name": "荒野雙雄生存對決",
+    "filename": "games/wild_west.html",
+    "title": "荒野雙雄生存對決",
+    "icon": "fa-gun"
+  },
+  {
+    "original_name": "跳棋",
+    "filename": "games/checkers.html",
+    "title": "跳棋遊戲",
+    "icon": "fa-chess-board"
+  }
+]

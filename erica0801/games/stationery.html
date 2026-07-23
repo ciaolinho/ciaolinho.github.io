@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文具失蹤案：神祕的小黑影</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --bg-color: #f0f8ff;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --wrong-color: #f44336;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, 'Microsoft JhengHei';
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none; /* 防止文字被選取 */
+        }
+
+        header {
+            text-align: center;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin: 0 0 10px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        p.instruction {
+            font-size: 1.2rem;
+            color: #555;
+            background: #ffeaa7;
+            padding: 8px 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .game-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
+            max-width: 800px;
+            width: 90%;
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            h1 { font-size: 2rem; }
+        }
+
+        .item-card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.15);
+        }
+
+        .item-icon {
+            font-size: 5rem;
+            margin-bottom: 10px;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .item-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        /* 狀態樣式 */
+        .item-card.correct {
+            background-color: #e8f5e9;
+            border: 4px solid var(--primary-color);
+            pointer-events: none;
+            animation: bounceIn 0.6s ease;
+        }
+
+        .item-card.wrong {
+            animation: shake 0.5s ease;
+        }
+
+        /* 覆蓋層 (打勾或叉叉) */
+        .overlay-icon {
+            position: absolute;
+            font-size: 6rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .item-card.correct .overlay-icon {
+            content: '⭕';
+            opacity: 0.7;
+            color: var(--primary-color);
+        }
+
+        /* 動畫 */
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px) rotate(-5deg); border: 2px solid var(--wrong-color); }
+            40%, 80% { transform: translateX(10px) rotate(5deg); border: 2px solid var(--wrong-color); }
+        }
+
+        /* 勝利畫面 */
+        #win-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        #win-screen.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .win-title {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            animation: bounceIn 1s ease infinite alternate;
+        }
+
+        .restart-btn {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+            transition: background 0.3s, transform 0.2s;
+            font-family: inherit;
+            font-weight: bold;
+        }
+
+        .restart-btn:hover {
+            background-color: #388e3c;
+            transform: scale(1.05);
+        }
+
+        /* 煙火畫布 */
+        #confetti {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>文具失蹤案：神祕的小黑影</h1>
+        <p class="instruction">請點擊所有屬於「文具」的物品！</p>
+    </header>
+
+    <div class="game-container" id="grid">
+        <!-- 物品將由 JavaScript 動態生成 -->
+    </div>
+
+    <!-- 勝利畫面 -->
+    <div id="win-screen">
+        <canvas id="confetti"></canvas>
+        <div class="win-title">太棒了！全部找到了！🎉</div>
+        <button class="restart-btn" onclick="initGame()">再玩一次</button>
+    </div>
+
+    <script>
+        // 遊戲資料設定 (根據 PPTX 內容設計)
+        const itemsData = [
+            { name: '鉛筆盒', icon: '👝', isStationery: true },
+            { name: '湯匙', icon: '🥄', isStationery: false },
+            { name: '鉛筆', icon: '✏️', isStationery: true },
+            { name: '手機', icon: '📱', isStationery: false },
+            { name: '大象', icon: '🐘', isStationery: false },
+            { name: '剪刀', icon: '✂️', isStationery: true },
+            // 額外加入兩個增加遊戲性
+            { name: '尺', icon: '📏', isStationery: true },
+            { name: '水桶', icon: '🪣', isStationery: false } 
+        ];
+
+        let foundCount = 0;
+        let totalStationery = 0;
+
+        // 音效系統 (使用內建 Web Audio API，不需外部檔案)
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            initAudio();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            if (type === 'correct') {
+                // 叮！的音效
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.5);
+            } else if (type === 'wrong') {
+                // 叭！的錯誤音效
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(150, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'win') {
+                // 勝利和弦
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, index) => {
+                    const osc = audioCtx.createOscillator();
+                    const gn = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.value = freq;
+                    osc.connect(gn);
+                    gn.connect(audioCtx.destination);
+                    gn.gain.setValueAtTime(0, audioCtx.currentTime);
+                    gn.gain.linearRampToValueAtTime(0.2, audioCtx.currentTime + 0.1 + (index*0.1));
+                    gn.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
+                    osc.start(audioCtx.currentTime + (index * 0.1));
+                    osc.stop(audioCtx.currentTime + 1.5);
+                });
+            }
+        }
+
+        // 打亂陣列順序 (洗牌演算法)
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // 初始化遊戲
+        function initGame() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            document.getElementById('win-screen').classList.remove('show');
+            foundCount = 0;
+            
+            // 計算總共有幾個文具
+            totalStationery = itemsData.filter(item => item.isStationery).length;
+            
+            // 洗牌並生成 DOM
+            const shuffledItems = shuffle([...itemsData]);
+            
+            shuffledItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.innerHTML = `
+                    <div class="overlay-icon">⭕</div>
+                    <div class="item-icon">${item.icon}</div>
+                    <div class="item-name">${item.name}</div>
+                `;
+                
+                card.addEventListener('click', () => handleItemClick(card, item));
+                grid.appendChild(card);
+            });
+        }
+
+        // 處理點擊事件
+        function handleItemClick(cardElem, itemData) {
+            // 避免重複點擊已答對的
+            if (cardElem.classList.contains('correct')) return;
+
+            if (itemData.isStationery) {
+                // 答對了
+                playSound('correct');
+                cardElem.classList.remove('wrong');
+                // 觸發重繪以重置動畫
+                void cardElem.offsetWidth; 
+                cardElem.classList.add('correct');
+                
+                foundCount++;
+                
+                if (foundCount === totalStationery) {
+                    setTimeout(showWinScreen, 800);
+                }
+            } else {
+                // 答錯了
+                playSound('wrong');
+                cardElem.classList.remove('wrong');
+                void cardElem.offsetWidth;
+                cardElem.classList.add('wrong');
+            }
+        }
+
+        // 顯示勝利畫面
+        function showWinScreen() {
+            playSound('win');
+            document.getElementById('win-screen').classList.add('show');
+            fireConfetti();
+        }
+
+        // 簡易煙火動畫 (無依賴)
+        function fireConfetti() {
+            const canvas = document.getElementById('confetti');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const pieces = [];
+            const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39', '#FFEB3B', '#FFC107', '#FF9800', '#FF5722'];
+
+            for (let i = 0; i < 100; i++) {
+                pieces.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2 + 100,
+                    vx: (Math.random() - 0.5) * 20,
+                    vy: (Math.random() - 1) * 20 - 5,
+                    size: Math.random() * 10 + 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 10
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let active = false;
+                pieces.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.5; // 重力
+                    p.rotation += p.rotationSpeed;
+                    
+                    if (p.y < canvas.height) active = true;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rotation * Math.PI / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+                    ctx.restore();
+                });
+
+                if (active) requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // 視窗大小改變時重設畫布
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('confetti');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // 啟動遊戲
+        window.onload = initGame;
+
+    </script>
+</body>
+</html>

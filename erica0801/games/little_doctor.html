@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小小醫師大冒險 - 象徵性互動遊戲</title>
+    <style>
+        :root {
+            --forest-bg: linear-gradient(to bottom, #a8dadc 0%, #a8dadc 60%, #7fb069 60%, #2d5a27 100%);
+            --ocean-bg: linear-gradient(to bottom, #caf0f8 0%, #90e0ef 40%, #0077b6 80%, #023e8a 100%);
+            --clinic-bg: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 60%, #dee2e6 100%);
+            --child-bg: linear-gradient(to bottom, #fff9db 0%, #fff3bf 60%, #fab005 100%);
+            
+            --primary-text: #2d3436;
+            --heart-red: #e63946;
+            --accent-gold: #ffb703;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 600px;
+            height: 850px;
+            max-height: 98vh;
+            background: white;
+            position: relative;
+            border-radius: 24px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+            border: 8px solid white;
+        }
+
+        /* 選單介面 */
+        #menu-scene {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            background: #fff;
+            padding: 20px;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .menu-title {
+            font-size: 1.8rem;
+            color: #2d5a27;
+            margin-bottom: 20px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .menu-card {
+            padding: 18px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .menu-card:hover { transform: scale(1.02); }
+        .card-forest { background: #4caf50; box-shadow: 0 6px #2e7d32; }
+        .card-ocean { background: #0077b6; box-shadow: 0 6px #023e8a; }
+        .card-clinic { background: #ff7043; box-shadow: 0 6px #d84315; }
+        .card-child { background: #be4bdb; box-shadow: 0 6px #862e9c; }
+
+        /* 遊戲場景通用 */
+        .scene {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .scene.active { display: block; }
+
+        .back-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+            background: rgba(255,255,255,0.8);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .ui-header {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 12px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 10;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* 互動區域 */
+        .stage {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            padding-bottom: 220px;
+            flex-wrap: wrap;
+        }
+
+        /* 患者 */
+        .patient {
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            margin: 10px;
+        }
+
+        .patient:hover { transform: scale(1.05); }
+
+        .status-bubble {
+            position: absolute;
+            top: -45px;
+            background: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            animation: float 2s infinite ease-in-out;
+            z-index: 5;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* 工具列 */
+        .toolbar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 95%;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px;
+            border-radius: 25px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+            z-index: 20;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+        }
+
+        .tool {
+            min-width: 60px;
+            height: 70px;
+            border-radius: 15px;
+            background: white;
+            border: 2px solid #eee;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 0 4px;
+        }
+
+        .tool span:first-child { font-size: 1.6rem; }
+        .tool-name { font-size: 0.6rem; font-weight: bold; margin-top: 2px; text-align: center; }
+
+        .tool.active {
+            border-color: var(--accent-gold);
+            background: var(--accent-gold);
+            transform: translateY(-8px);
+            box-shadow: 0 5px 10px rgba(255, 183, 3, 0.3);
+        }
+
+        /* 特效 */
+        .heart-effect {
+            position: absolute;
+            color: var(--heart-red);
+            font-size: 2.5rem;
+            pointer-events: none;
+            animation: rise-fade 1s forwards;
+            z-index: 100;
+        }
+
+        @keyframes rise-fade {
+            0% { transform: translateY(0) scale(0.5); opacity: 1; }
+            100% { transform: translateY(-120px) scale(1.5); opacity: 0; }
+        }
+
+        /* 成功彈窗 */
+        #modal-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            padding: 30px;
+            border-radius: 25px;
+            text-align: center;
+            width: 85%;
+            animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes pop-in {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .btn-primary {
+            background: #2d5a27;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        /* SVG 圖標強化 */
+        .svg-obj { width: 80px; height: 100px; }
+        .sick { filter: grayscale(0.4) brightness(0.9); }
+        .healed { filter: saturate(1.2) drop-shadow(0 0 10px rgba(255,255,255,0.5)); }
+
+        /* 抖動動畫 */
+        @keyframes shake {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+        .shake-anim { animation: shake 0.3s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    
+    <!-- 主選單頁面 -->
+    <div id="menu-scene">
+        <div style="font-size: 3.5rem; margin-bottom: 5px;">🩺</div>
+        <h1 class="menu-title">小小醫師大冒險</h1>
+        <p style="color: #666; margin-bottom: 20px;">今天你想去哪裡出任務呢？</p>
+        <div class="menu-grid">
+            <div class="menu-card card-forest" onclick="startScene('forest')">
+                <span>🌲 森林醫師任務</span>
+                <span>▶</span>
+            </div>
+            <div class="menu-card card-ocean" onclick="startScene('ocean')">
+                <span>🌊 海洋救援任務</span>
+                <span>▶</span>
+            </div>
+            <div class="menu-card card-clinic" onclick="startScene('clinic')">
+                <span>🏠 寵物診所任務</span>
+                <span>▶</span>
+            </div>
+            <div class="menu-card card-child" onclick="startScene('child')">
+                <span>🌟 健康小超人(生活篇)</span>
+                <span>▶</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 森林場景 -->
+    <div id="forest-scene" class="scene" style="background: var(--forest-bg);">
+        <button class="back-btn" onclick="goToMenu()">⬅ 返回</button>
+        <div class="ui-header">
+            <h2 style="margin:0; font-size:1.1rem; color:#2d5a27;">森林巡邏醫師</h2>
+            <p id="forest-hint" style="margin:5px 0 0; font-size:0.8rem; color:#666;">點擊工具醫治受傷的居民</p>
+        </div>
+        <div class="stage">
+            <div class="patient sick" id="f-p1" onclick="handleAction('forest', 'f-p1')">
+                <div class="status-bubble">💧</div>
+                <svg class="svg-obj" viewBox="0 0 100 120"><rect x="42" y="70" width="16" height="40" fill="#5d4037" /><circle cx="50" cy="50" r="35" fill="#4caf50" /></svg>
+            </div>
+            <div class="patient sick" id="f-p2" onclick="handleAction('forest', 'f-p2')">
+                <div class="status-bubble">🩹</div>
+                <svg class="svg-obj" viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="#42a5f5" /><path d="M75 50 L85 45 L85 55 Z" fill="#ffb703" /></svg>
+            </div>
+        </div>
+        <div class="toolbar">
+            <div class="tool" onclick="selectTool('water')"><span>💧</span><span class="tool-name">澆水</span></div>
+            <div class="tool" onclick="selectTool('bandage')"><span>🩹</span><span class="tool-name">包紮</span></div>
+        </div>
+    </div>
+
+    <!-- 海洋場景 -->
+    <div id="ocean-scene" class="scene" style="background: var(--ocean-bg);">
+        <button class="back-btn" onclick="goToMenu()">⬅ 返回</button>
+        <div class="ui-header">
+            <h2 style="margin:0; font-size:1.1rem; color:#003049;">海洋急救醫師</h2>
+            <p id="ocean-hint" style="margin:5px 0 0; font-size:0.8rem; color:#666;">清掉垃圾與汙垢</p>
+        </div>
+        <div class="stage">
+            <div class="patient sick" id="o-p1" onclick="handleAction('ocean', 'o-p1')">
+                <div class="status-bubble">✂️</div>
+                <svg class="svg-obj" viewBox="0 0 100 100"><ellipse cx="50" cy="60" rx="35" ry="25" fill="#2e7d32" /><circle cx="85" cy="60" r="12" fill="#66bb6a" /></svg>
+            </div>
+            <div class="patient sick" id="o-p2" onclick="handleAction('ocean', 'o-p2')">
+                <div class="status-bubble">🧼</div>
+                <svg class="svg-obj" viewBox="0 0 100 100"><path d="M20 50 Q50 10 80 50 Q50 90 20 50" fill="#fbc02d" /><path d="M10 40 L25 50 L10 60 Z" fill="#f9a825" /></svg>
+            </div>
+        </div>
+        <div class="toolbar">
+            <div class="tool" onclick="selectTool('scissors')"><span>✂️</span><span class="tool-name">剪刀</span></div>
+            <div class="tool" onclick="selectTool('soap')"><span>🧼</span><span class="tool-name">清潔</span></div>
+        </div>
+    </div>
+
+    <!-- 寵物診所場景 -->
+    <div id="clinic-scene" class="scene" style="background: var(--clinic-bg);">
+        <button class="back-btn" onclick="goToMenu()">⬅ 返回</button>
+        <div class="ui-header">
+            <h2 style="margin:0; font-size:1.1rem; color:#d84315;">寵物診所醫師</h2>
+            <p id="clinic-hint" style="margin:5px 0 0; font-size:0.8rem; color:#666;">量體溫或是拔刺</p>
+        </div>
+        <div class="stage">
+            <div class="patient sick" id="c-p1" onclick="handleAction('clinic', 'c-p1')">
+                <div class="status-bubble">🌡️</div>
+                <svg class="svg-obj" viewBox="0 0 100 100"><circle cx="50" cy="60" r="25" fill="#ffa726" /><path d="M30 40 L40 50 L25 55 Z" fill="#ffa726" /><path d="M70 40 L60 50 L75 55 Z" fill="#ffa726" /></svg>
+            </div>
+            <div class="patient sick" id="c-p2" onclick="handleAction('clinic', 'c-p2')">
+                <div class="status-bubble">📍</div>
+                <svg class="svg-obj" viewBox="0 0 100 100"><rect x="30" y="40" width="40" height="40" rx="10" fill="#8d6e63" /><path d="M25 40 Q20 60 25 80" stroke="#5d4037" stroke-width="8" fill="none" /></svg>
+            </div>
+        </div>
+        <div class="toolbar">
+            <div class="tool" onclick="selectTool('thermometer')"><span>🌡️</span><span class="tool-name">體溫計</span></div>
+            <div class="tool" onclick="selectTool('tweezers')"><span>📍</span><span class="tool-name">拔刺器</span></div>
+        </div>
+    </div>
+
+    <!-- 健康小超人場景 (新增) -->
+    <div id="child-scene" class="scene" style="background: var(--child-bg);">
+        <button class="back-btn" onclick="goToMenu()">⬅ 返回</button>
+        <div class="ui-header">
+            <h2 style="margin:0; font-size:1.1rem; color:#862e9c;">健康小超人診所</h2>
+            <p id="child-hint" style="margin:5px 0 0; font-size:0.8rem; color:#666;">幫助小朋友養成好習慣！</p>
+        </div>
+        <div class="stage" style="padding-bottom: 230px; justify-content: center;">
+            <!-- 睡眠 -->
+            <div class="patient sick" id="h-sleep" onclick="handleAction('child', 'h-sleep')">
+                <div class="status-bubble">🌙</div>
+                <svg class="svg-obj" viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="#ffccbc"/><path d="M40 55 Q50 65 60 55" stroke="black" fill="none"/></svg>
+                <div style="font-size:0.7rem; font-weight:bold;">好累喔</div>
+            </div>
+            <!-- 食物 -->
+            <div class="patient sick" id="h-food" onclick="handleAction('child', 'h-food')">
+                <div class="status-bubble">🍟</div>
+                <svg class="svg-obj" viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="#d1c4e9"/><path d="M40 60 L60 60" stroke="black" fill="none"/></svg>
+                <div style="font-size:0.7rem; font-weight:bold;">想吃零食</div>
+            </div>
+            <!-- 運動 -->
+            <div class="patient sick" id="h-sport" onclick="handleAction('child', 'h-sport')">
+                <div class="status-bubble">📺</div>
+                <svg class="svg-obj" viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="#c8e6c9"/><path d="M45 55 L55 55" stroke="black" fill="none"/></svg>
+                <div style="font-size:0.7rem; font-weight:bold;">不想動</div>
+            </div>
+            <!-- 水 -->
+            <div class="patient sick" id="h-water" onclick="handleAction('child', 'h-water')">
+                <div class="status-bubble">🥵</div>
+                <svg class="svg-obj" viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="#bbdefb"/><path d="M40 60 Q50 50 60 60" stroke="black" fill="none"/></svg>
+                <div style="font-size:0.7rem; font-weight:bold;">口渴了</div>
+            </div>
+            <!-- 清潔 -->
+            <div class="patient sick" id="h-clean" onclick="handleAction('child', 'h-clean')">
+                <div class="status-bubble">🦠</div>
+                <svg class="svg-obj" viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="#f8bbd0"/><path d="M40 55 Q50 65 60 55" stroke="black" fill="none"/></svg>
+                <div style="font-size:0.7rem; font-weight:bold;">髒兮兮</div>
+            </div>
+        </div>
+        <div class="toolbar">
+            <div class="tool" onclick="selectTool('bed')"><span>🛌</span><span class="tool-name">準時睡覺</span></div>
+            <div class="tool" onclick="selectTool('apple')"><span>🍎</span><span class="tool-name">營養食物</span></div>
+            <div class="tool" onclick="selectTool('ball')"><span>⚽</span><span class="tool-name">快樂運動</span></div>
+            <div class="tool" onclick="selectTool('cup')"><span>🥤</span><span class="tool-name">多喝開水</span></div>
+            <div class="tool" onclick="selectTool('shower')"><span>🧼</span><span class="tool-name">勤洗手</span></div>
+        </div>
+    </div>
+
+    <!-- 成功結算 -->
+    <div id="modal-overlay">
+        <div class="modal">
+            <div id="finish-icon" style="font-size: 4rem;">🏆</div>
+            <h2 id="finish-title">任務圓滿達成！</h2>
+            <p id="finish-text">你真是個全能的好醫師。</p>
+            <button class="btn-primary" onclick="goToMenu()">回主選單</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let activeTool = null;
+    let sceneState = {
+        forest: { cured: 0, total: 2 },
+        ocean: { cured: 0, total: 2 },
+        clinic: { cured: 0, total: 2 },
+        child: { cured: 0, total: 5 }
+    };
+
+    const logic = {
+        'f-p1': 'water', 'f-p2': 'bandage',
+        'o-p1': 'scissors', 'o-p2': 'soap',
+        'c-p1': 'thermometer', 'c-p2': 'tweezers',
+        'h-sleep': 'bed', 'h-food': 'apple', 'h-sport': 'ball', 'h-water': 'cup', 'h-clean': 'shower'
+    };
+
+    const messages = {
+        'forest': '森林裡的動植物都恢復活力了！',
+        'ocean': '大海恢復湛藍，魚兒開心的游水！',
+        'clinic': '毛孩們的精神變好了，太棒了！',
+        'child': '小朋友學會了健康生活，變成健康小超人了！'
+    };
+
+    const toolMap = { 
+        '💧':'water', '🩹':'bandage', 
+        '✂️':'scissors', '🧼':'soap', 
+        '🌡️':'thermometer', '📍':'tweezers',
+        '🛌':'bed', '🍎':'apple', '⚽':'ball', '🥤':'cup', '🚿':'shower'
+    };
+
+    function startScene(id) {
+        document.getElementById('menu-scene').style.display = 'none';
+        document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+        document.getElementById(id + '-scene').classList.add('active');
+        activeTool = null;
+        updateToolUI();
+    }
+
+    function goToMenu() {
+        document.getElementById('menu-scene').style.display = 'flex';
+        document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+        document.getElementById('modal-overlay').style.display = 'none';
+        resetProgress();
+    }
+
+    function selectTool(tool) {
+        activeTool = (activeTool === tool) ? null : tool;
+        updateToolUI();
+    }
+
+    function updateToolUI() {
+        document.querySelectorAll('.tool').forEach(t => {
+            t.classList.remove('active');
+            const toolIcon = t.querySelector('span').innerText;
+            if (toolMap[toolIcon] === activeTool) t.classList.add('active');
+        });
+    }
+
+    function handleAction(sceneType, patientId) {
+        const el = document.getElementById(patientId);
+        if (el.classList.contains('healed')) return;
+
+        if (!activeTool) {
+            // 這裡可以換成自訂的閃爍提醒
+            return;
+        }
+
+        if (logic[patientId] === activeTool) {
+            el.classList.remove('sick');
+            el.classList.add('healed');
+            const bubble = el.querySelector('.status-bubble');
+            if (bubble) bubble.style.display = 'none';
+            
+            // 愛心特效
+            const heart = document.createElement('div');
+            heart.className = 'heart-effect';
+            heart.innerText = '❤️';
+            el.appendChild(heart);
+            setTimeout(() => heart.remove(), 1000);
+
+            sceneState[sceneType].cured++;
+            if (sceneState[sceneType].cured === sceneState[sceneType].total) {
+                showFinish(sceneType);
+            }
+        } else {
+            el.classList.add('shake-anim');
+            setTimeout(() => el.classList.remove('shake-anim'), 500);
+        }
+    }
+
+    function showFinish(sceneType) {
+        setTimeout(() => {
+            document.getElementById('modal-overlay').style.display = 'flex';
+            document.getElementById('finish-text').innerText = messages[sceneType];
+            const icons = { forest: '🌳', ocean: '🐳', clinic: '🐈', child: '🦸' };
+            document.getElementById('finish-icon').innerText = icons[sceneType];
+        }, 800);
+    }
+
+    function resetProgress() {
+        sceneState = {
+            forest: { cured: 0, total: 2 },
+            ocean: { cured: 0, total: 2 },
+            clinic: { cured: 0, total: 2 },
+            child: { cured: 0, total: 5 }
+        };
+        document.querySelectorAll('.patient').forEach(p => {
+            p.classList.add('sick');
+            p.classList.remove('healed');
+            const bubble = p.querySelector('.status-bubble');
+            if (bubble) bubble.style.display = 'block';
+        });
+    }
+</script>
+
+</body>
+</html>

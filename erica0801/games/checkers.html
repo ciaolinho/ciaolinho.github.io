@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跳棋 (單機雙人版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html, body { 
+            width: 100%; 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            background-color: transparent; /* 適合內嵌，背景設定為透明 */
+            overflow: hidden; /* 防止內嵌時出現捲軸 */
+            font-family: sans-serif; 
+        }
+        .piece { transition: all 0.2s ease-in-out; }
+        .hole { transition: all 0.2s ease; cursor: pointer; }
+        .highlight { 
+            animation: pulse-border 1.5s infinite; 
+            cursor: pointer; 
+        }
+        @keyframes pulse-border {
+            0% { stroke: #34d399; stroke-width: 2; }
+            50% { stroke: #059669; stroke-width: 5; }
+            100% { stroke: #34d399; stroke-width: 2; }
+        }
+        svg { filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); }
+    </style>
+</head>
+<body class="w-full h-full m-0 p-0 overflow-hidden bg-transparent">
+    
+    <!-- 主要容器，自動填滿 iframe 或父容器的可用空間 -->
+    <div class="flex flex-col w-full h-full p-2 sm:p-4 box-border max-w-4xl mx-auto">
+        
+        <!-- 使用者介面 (更緊湊，適合小尺寸內嵌) -->
+        <div class="flex justify-between items-center bg-white/90 backdrop-blur p-2 sm:p-3 rounded-xl shadow border border-gray-100 mb-2 sm:mb-4 shrink-0">
+            <h1 class="text-lg sm:text-2xl font-bold text-gray-800 hidden sm:block ml-2">跳棋</h1>
+            <div id="status" class="transition-colors flex-1 text-center mx-2">
+                <!-- 狀態顯示 -->
+            </div>
+            <button onclick="resetGame()" class="px-3 py-1.5 sm:px-4 sm:py-2 bg-indigo-600 text-white text-sm sm:text-base rounded-lg hover:bg-indigo-700 font-bold shadow transition transform hover:scale-105 active:scale-95 whitespace-nowrap mr-1">
+                重新開始
+            </button>
+        </div>
+
+        <!-- 遊戲棋盤 (使用 flex-1 自動填滿剩餘高度) -->
+        <div class="flex-1 w-full min-h-0 relative flex justify-center items-center">
+            <svg id="board" viewBox="-300 -30 600 620" class="w-full h-full bg-white rounded-2xl p-2 sm:p-4 shadow-sm"></svg>
+        </div>
+    </div>
+
+    <script>
+        // 變數定義
+        const rowCounts = [1, 2, 3, 4, 13, 12, 11, 10, 9, 10, 11, 12, 13, 4, 3, 2, 1];
+        let nodes = [];
+        let nodeMap = new Map();
+        let pieces = [];
+        let currentTurn = 1;
+        let selectedPiece = null;
+        let validMoves = [];
+        let winner = null;
+
+        // 初始化遊戲
+        function initGame() {
+            nodes = [];
+            nodeMap = new Map();
+            pieces = [];
+            currentTurn = 1;
+            selectedPiece = null;
+            validMoves = [];
+            winner = null;
+
+            let id = 0;
+            
+            // 建立棋盤節點
+            for (let r = 0; r < 17; r++) {
+                let count = rowCounts[r];
+                let startX = -(count - 1) / 2;
+                for (let i = 0; i < count; i++) {
+                    let x = startX + i;
+                    let y = r;
+                    let cx = x * 40;
+                    let cy = y * 34.64;
+                    
+                    let node = { id: id++, x: x, y: y, r: r, cx: cx, cy: cy };
+                    nodes.push(node);
+                    nodeMap.set(`${x},${y}`, node);
+
+                    // 放置初始棋子
+                    if (r <= 3) {
+                        pieces.push({ id: `p_${node.id}`, player: 1, nodeId: node.id });
+                    } else if (r >= 13) {
+                        pieces.push({ id: `p_${node.id}`, player: 2, nodeId: node.id });
+                    }
+                }
+            }
+            updateStatus();
+            render();
+        }
+
+        // 取得特定節點上的棋子
+        function getPieceAt(nodeId) {
+            return pieces.find(p => p.nodeId === nodeId);
+        }
+
+        // 計算可移動的合法步數
+        function calculateValidMoves(piece) {
+            validMoves = [];
+            let startNode = nodes.find(n => n.id === piece.nodeId);
+
+            // 6個可能的移動方向
+            const dirs = [
+                {x: 1, y: 0}, {x: -1, y: 0},
+                {x: 0.5, y: 1}, {x: -0.5, y: 1},
+                {x: 0.5, y: -1}, {x: -0.5, y: -1}
+            ];
+
+            // 1. 單步移動 (走一格)
+            dirs.forEach(d => {
+                let neighbor = nodeMap.get(`${startNode.x + d.x},${startNode.y + d.y}`);
+                if (neighbor && !getPieceAt(neighbor.id)) {
+                    validMoves.push(neighbor.id);
+                }
+            });
+
+            // 2. 跳躍 (透過廣度優先搜尋計算連續跳躍)
+            let queue = [startNode];
+            let visited = new Set();
+            visited.add(startNode.id);
+
+            while(queue.length > 0) {
+                let curr = queue.shift();
+                
+                dirs.forEach(d => {
+                    let adj = nodeMap.get(`${curr.x + d.x},${curr.y + d.y}`);
+                    // 如果相鄰位置有棋子可以當作「橋樑」跳過
+                    if (adj && getPieceAt(adj.id)) {
+                        let landing = nodeMap.get(`${curr.x + 2*d.x},${curr.y + 2*d.y}`);
+                        // 如果跳過去的落點是空的，且還沒走訪過
+                        if (landing && !getPieceAt(landing.id) && !visited.has(landing.id)) {
+                            visited.add(landing.id);
+                            queue.push(landing);
+                            validMoves.push(landing.id);
+                        }
+                    }
+                });
+            }
+        }
+
+        // 處理玩家點擊事件
+        window.handleNodeClick = function(nodeId) {
+            if (winner) return;
+
+            if (validMoves.includes(nodeId)) {
+                // 執行移動棋子
+                selectedPiece.nodeId = nodeId;
+                selectedPiece = null;
+                validMoves = [];
+                
+                checkWin();
+                if (!winner) {
+                    currentTurn = currentTurn === 1 ? 2 : 1; // 換對手回合
+                }
+                updateStatus();
+                render();
+            } else {
+                let p = getPieceAt(nodeId);
+                // 選擇自己的棋子
+                if (p && p.player === currentTurn) {
+                    if (selectedPiece === p) {
+                        selectedPiece = null;
+                        validMoves = [];
+                    } else {
+                        selectedPiece = p;
+                        calculateValidMoves(p);
+                    }
+                    render();
+                } else if (selectedPiece) {
+                    // 點擊無效區域，取消選擇
+                    selectedPiece = null;
+                    validMoves = [];
+                    render();
+                }
+            }
+        }
+
+        // 檢查勝利條件
+        function checkWin() {
+            let p1Win = pieces.filter(p => p.player === 1).every(p => {
+                let n = nodes.find(node => node.id === p.nodeId);
+                return n.r >= 13; // 玩家 1 (紅方) 的棋子全數到達底部則獲勝
+            });
+            let p2Win = pieces.filter(p => p.player === 2).every(p => {
+                let n = nodes.find(node => node.id === p.nodeId);
+                return n.r <= 3;  // 玩家 2 (藍方) 的棋子全數到達頂部則獲勝
+            });
+
+            if (p1Win) winner = 1;
+            else if (p2Win) winner = 2;
+        }
+
+        // 更新 UI 顯示狀態 (加入 RWD 響應式文字大小)
+        function updateStatus() {
+            let statusEl = document.getElementById('status');
+            let baseClass = "text-sm sm:text-base font-bold px-2 py-1.5 sm:px-4 sm:py-2 rounded-lg inline-block ";
+            if (winner) {
+                statusEl.innerHTML = winner === 1 ? "🏆 玩家 1 (紅方) 獲勝！" : "🏆 玩家 2 (藍方) 獲勝！";
+                statusEl.className = baseClass + (winner === 1 ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700");
+            } else {
+                statusEl.innerHTML = currentTurn === 1 ? "輪到：紅方" : "輪到：藍方";
+                statusEl.className = baseClass + (currentTurn === 1 ? "bg-red-50 text-red-600 border border-red-200" : "bg-blue-50 text-blue-600 border border-blue-200");
+            }
+        }
+
+        window.resetGame = function() {
+            initGame();
+        }
+
+        // 將棋盤渲染至 SVG
+        function render() {
+            let svg = document.getElementById('board');
+            let html = '';
+
+            // 1. 畫出格線 (路徑)
+            nodes.forEach(n => {
+                const neighbors = [
+                    {x: n.x + 1, y: n.y},
+                    {x: n.x + 0.5, y: n.y + 1},
+                    {x: n.x - 0.5, y: n.y + 1}
+                ];
+                neighbors.forEach(nb => {
+                    let target = nodeMap.get(`${nb.x},${nb.y}`);
+                    if (target) {
+                        html += `<line x1="${n.cx}" y1="${n.cy}" x2="${target.cx}" y2="${target.cy}" stroke="#e2e8f0" stroke-width="2.5" />`;
+                    }
+                });
+            });
+
+            // 2. 畫出空洞 (可用來放置棋子的位置)
+            nodes.forEach(n => {
+                let isHighlight = validMoves.includes(n.id);
+                let cls = isHighlight ? 'highlight' : 'hole';
+                
+                // 區分不同陣營的底色
+                let fill = '#f1f5f9';
+                if(n.r <= 3) fill = '#fef2f2'; // 紅方起點
+                if(n.r >= 13) fill = '#eff6ff'; // 藍方起點
+
+                let stroke = isHighlight ? '#10b981' : '#cbd5e1';
+                let sw = isHighlight ? '4' : '1.5';
+
+                html += `<circle onclick="handleNodeClick(${n.id})" cx="${n.cx}" cy="${n.cy}" r="14" fill="${fill}" class="${cls}" stroke="${stroke}" stroke-width="${sw}" />`;
+            });
+
+            // 3. 畫出玩家的棋子
+            pieces.forEach(p => {
+                let n = nodes.find(node => node.id === p.nodeId);
+                let fill = p.player === 1 ? '#ef4444' : '#3b82f6';
+                let isSelected = selectedPiece === p;
+                
+                let stroke = isSelected ? '#fbbf24' : 'rgba(0,0,0,0.15)';
+                let sw = isSelected ? '5' : '1';
+
+                // pointer-events-none 確保點擊可以穿透棋子，直接點擊到底部的洞
+                html += `<circle cx="${n.cx}" cy="${n.cy}" r="11" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" class="piece pointer-events-none shadow-lg" />`;
+                
+                // 增加小高光，製造立體感
+                html += `<circle cx="${n.cx - 3}" cy="${n.cy - 3}" r="4" fill="white" opacity="0.3" class="pointer-events-none" />`;
+            });
+
+            svg.innerHTML = html;
+        }
+
+        // 執行啟動遊戲
+        initGame();
+    </script>
+</body>
+</html>
