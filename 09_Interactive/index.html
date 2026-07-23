@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>霓虹手勢愛心 - MediaPipe Generative Art</title>
+    
+    <!-- 匯入 Google MediaPipe 相關函式庫 -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+    <!-- Tailwind CSS 用於快速構建深色高質感 UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #0f1115; /* 深色背景質感 */
+            background-image: url('https://images.unsplash.com/photo-1542272201-b1ca555f8505?q=80&w=2000&auto=format&fit=crop'); /* 寫實雲霧山水畫背景 */
+            background-size: cover;
+            background-position: center;
+            color: #e2e8f0;
+            font-family: 'PingFang TC', 'Heiti TC', 'Microsoft JhengHei', sans-serif;
+            touch-action: none;
+        }
+
+        /* 隱藏原始影片元件，只取其資料 */
+        #videoElement {
+            display: none;
+        }
+
+        /* 多層 Canvas 架構 */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none; /* 讓滑鼠可以點擊底下的 UI */
+        }
+
+        /* L1 底層：攝影機畫面 (0.25 透明度) */
+        #bgCanvas { z-index: 1; }
+
+        /* L2 中層：水墨畫布 */
+        #drawCanvas { z-index: 2; }
+        
+        /* L3 頂層：前景光斑效果 */
+        #fgCanvas { z-index: 3; }
+
+        /* 控制面板 UI */
+        #ui-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: rgba(15, 17, 21, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: auto;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* 音樂控制按鈕 */
+        #musicToggleBtn {
+            transition: all 0.3s ease;
+        }
+        #musicToggleBtn.playing {
+            background-color: rgba(244, 63, 94, 0.2);
+            border-color: rgba(244, 63, 94, 0.5);
+            color: #f43f5e;
+        }
+
+        /* 載入中遮罩 */
+        #loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 17, 21, 0.85); /* 改為半透明，透出後方山水畫 */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: #f43f5e;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 山水畫背景圖 (供儲存畫布時合成使用) -->
+    <img id="bgImage" src="https://images.unsplash.com/photo-1542272201-b1ca555f8505?q=80&w=2000&auto=format&fit=crop" crossorigin="anonymous" style="display: none;">
+
+    <!-- 音效資源 -->
+    <!-- BGM: 禪意氛圍音樂 (替換回高吉米風格) -->
+    <audio id="bgmAudio" loop preload="auto" src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=zen-garden-110699.mp3"></audio>
+    <!-- SFX: 毛筆揮毫聲 (循環) -->
+    <audio id="drawSound" loop preload="auto" src="https://cdn.pixabay.com/download/audio/2022/03/24/audio_0817555710.mp3?filename=writing-with-marker-1-35851.mp3"></audio>
+    <!-- SFX: 開花風鈴聲 -->
+    <audio id="bloomSound" preload="auto" src="https://cdn.pixabay.com/download/audio/2022/03/24/audio_8246767160.mp3?filename=wind-chime-sound-effect-1-35847.mp3"></audio>
+
+    <!-- 載入中遮罩 -->
+    <div id="loader">
+        <div class="spinner mb-4"></div>
+        <h2 class="text-xl font-bold tracking-widest text-gray-200">正在喚醒 AI 視覺神經...</h2>
+        <p class="text-gray-400 mt-2 text-sm">請允許瀏覽器使用您的攝影機權限</p>
+    </div>
+
+    <!-- UI 控制面板 -->
+    <div id="ui-panel" class="rounded-2xl p-6 w-80">
+        <div class="flex justify-between items-center mb-2">
+            <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-purple-400 tracking-wide">
+                霓虹手勢愛心
+            </h1>
+            <!-- 音樂開關按鈕 -->
+            <button id="musicToggleBtn" class="p-2 rounded-full border border-gray-600 text-gray-400 hover:text-white hover:border-gray-400 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                  </svg>
+            </button>
+        </div>
+        <p class="text-sm text-gray-400 mb-4 leading-relaxed">
+            AI 手勢生成互動藝術<br>
+        </p>
+        
+        <div class="space-y-3 mb-6">
+            <div class="flex items-center text-sm">
+                <span class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center mr-3 border border-gray-700 text-rose-400">☝️</span>
+                <span><b>比「1」(食指)</b>：畫出水墨枝幹</span>
+            </div>
+            <div class="flex items-center text-sm">
+                <span class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center mr-3 border border-gray-700 text-rose-400">🫰</span>
+                <span><b>手指愛心 (Pinch)</b>：召喚漂浮霓虹愛心</span>
+            </div>
+            <div class="flex items-center text-sm">
+                <span class="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center mr-3 border border-gray-700">🖐️</span>
+                <span><b>鬆開手指 (Release)</b>：綻放水墨梅花</span>
+            </div>
+        </div>
+
+        <div class="flex gap-3">
+            <button id="clearBtn" class="flex-1 bg-gray-800 hover:bg-gray-700 text-white py-2 px-4 rounded-xl text-sm font-medium transition-all duration-200 border border-gray-600 hover:border-rose-400">
+                清除愛心
+            </button>
+            <button id="saveBtn" class="flex-1 bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white py-2 px-4 rounded-xl text-sm font-medium transition-all duration-200 shadow-lg shadow-rose-900/50">
+                儲存畫面
+            </button>
+        </div>
+    </div>
+
+    <!-- 影像來源 (隱藏) -->
+    <video id="videoElement" autoplay playsinline></video>
+
+    <!-- 三層畫布 -->
+    <canvas id="bgCanvas"></canvas>
+    <canvas id="drawCanvas"></canvas>
+    <canvas id="fgCanvas"></canvas>
+
+    <script>
+        // --- DOM 元素與 Context 取得 ---
+        const videoElement = document.getElementById('videoElement');
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        const drawCanvas = document.getElementById('drawCanvas');
+        const drawCtx = drawCanvas.getContext('2d');
+        const fgCanvas = document.getElementById('fgCanvas');
+        const fgCtx = fgCanvas.getContext('2d');
+        const loader = document.getElementById('loader');
+        const musicToggleBtn = document.getElementById('musicToggleBtn');
+
+        // --- 音效元素 ---
+        const bgmAudio = document.getElementById('bgmAudio');
+        const drawSound = document.getElementById('drawSound');
+        const bloomSound = document.getElementById('bloomSound');
+
+        // --- 狀態變數 ---
+        let isDrawing = false;
+        let lastPos = null;
+        let isLoaded = false;
+        let smoothedX = 0;
+        let smoothedY = 0;
+        let isMusicPlaying = false;
+        let hearts = [];
+        let lastHeartTime = 0;
+        
+        // 記錄每隻手的捏合與畫筆狀態，用於觸發開花與繪製枝幹
+        let handStates = [
+            { isPinching: false, isBrushing: false, lastX: 0, lastY: 0, brushLastX: null, brushLastY: null },
+            { isPinching: false, isBrushing: false, lastX: 0, lastY: 0, brushLastX: null, brushLastY: null }
+        ];
+
+        // 設定音量
+        bgmAudio.volume = 0.3; // 恢復寧靜音量
+        drawSound.volume = 0.6; // 啟用畫筆聲
+        bloomSound.volume = 0.4;
+
+        // --- 初始化畫布大小 ---
+        function resizeCanvas() {
+            bgCanvas.width = drawCanvas.width = fgCanvas.width = window.innerWidth;
+            bgCanvas.height = drawCanvas.height = fgCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // --- 音樂開關控制 ---
+        musicToggleBtn.addEventListener('click', () => {
+            isMusicPlaying = !isMusicPlaying;
+            musicToggleBtn.classList.toggle('playing', isMusicPlaying);
+            
+            // 更新按鈕圖示
+            if (isMusicPlaying) {
+                bgmAudio.play().catch(e => console.log("BGM play failed:", e));
+                musicToggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>`;
+            } else {
+                bgmAudio.pause();
+                drawSound.pause(); // 關閉音樂時也停用畫筆聲
+                musicToggleBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" /></svg>`;
+            }
+        });
+
+        // --- 前景光斑效果 (Bokeh Particles) ---
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * fgCanvas.width;
+                this.y = Math.random() * fgCanvas.height;
+                this.size = Math.random() * 30 + 5; // 大小範圍
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+                this.alpha = Math.random() * 0.3; // 初始透明度
+                this.alphaSpeed = (Math.random() - 0.5) * 0.01; // 透明度變化速度
+                // 隨機冷暖色調
+                const colors = ['255, 200, 220', '200, 220, 255', '220, 255, 220'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.alpha += this.alphaSpeed;
+
+                // 透明度邊界檢查與反向
+                if (this.alpha <= 0 || this.alpha >= 0.4) {
+                    this.alphaSpeed *= -1;
+                }
+                // 畫面邊界檢查與重生
+                if (this.x < -50 || this.x > fgCanvas.width + 50 || this.y < -50 || this.y > fgCanvas.height + 50) {
+                    this.reset();
+                }
+            }
+            draw() {
+                fgCtx.beginPath();
+                fgCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                fgCtx.fillStyle = `rgba(${this.color}, ${Math.max(0, this.alpha)})`;
+                // 添加模糊效果
+                fgCtx.shadowColor = `rgba(${this.color}, 1)`;
+                fgCtx.shadowBlur = 20;
+                fgCtx.fill();
+                fgCtx.shadowBlur = 0; // 重置 shadowBlur 避免影響其他繪製
+            }
+        }
+
+        const particles = [];
+        for (let i = 0; i < 50; i++) { // 粒子數量
+            particles.push(new Particle());
+        }
+
+        // --- 漂浮愛心類別 ---
+        class Heart {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 15 + 15; // 大小 15~30
+                this.speedY = -Math.random() * 2 - 2; // 向上飄浮
+                this.speedX = (Math.random() - 0.5) * 2;
+                this.alpha = 1;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.015 + 0.01;
+                
+                const colors = [
+                    '244, 63, 94',  // Rose 500
+                    '251, 113, 133', // Rose 400
+                    '236, 72, 153',  // Pink 500
+                    '217, 70, 239'   // Fuchsia 500
+                ];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.rotation = (Math.random() - 0.5) * 0.5;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.life -= this.decay;
+                this.alpha = Math.max(0, this.life);
+            }
+            draw(ctx) {
+                if (this.alpha <= 0) return;
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.scale(this.size / 30, this.size / 30);
+                
+                // 繪製貝茲曲線愛心
+                ctx.beginPath();
+                ctx.moveTo(0, 15);
+                ctx.bezierCurveTo(-15, 0, -30, 20, 0, 40);
+                ctx.bezierCurveTo(30, 20, 15, 0, 0, 15);
+                
+                ctx.fillStyle = `rgba(${this.color}, ${this.alpha})`;
+                ctx.shadowColor = `rgba(${this.color}, ${this.alpha})`;
+                ctx.shadowBlur = 15;
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // 前景動畫迴圈
+        function animateForeground() {
+            fgCtx.clearRect(0, 0, fgCanvas.width, fgCanvas.height);
+            // 繪製背景光斑
+            fgCtx.globalCompositeOperation = 'lighter';
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            fgCtx.globalCompositeOperation = 'source-over'; // 重置混合模式
+            
+            // 繪製並更新愛心
+            for (let i = hearts.length - 1; i >= 0; i--) {
+                hearts[i].update();
+                hearts[i].draw(fgCtx);
+                if (hearts[i].life <= 0) {
+                    hearts.splice(i, 1);
+                }
+            }
+            
+            requestAnimationFrame(animateForeground);
+        }
+        animateForeground(); // 啟動前景動畫
+
+        // --- 繪圖相關函式 ---
+
+        // 繪製半透明 Webcam 影像到底層 Canvas
+        function drawVideoBackground(image) {
+            bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+            bgCtx.save();
+            bgCtx.globalAlpha = 0.25; // 0.25 透明度打淡
+
+            const canvasRatio = bgCanvas.width / bgCanvas.height;
+            const imgRatio = image.width / image.height;
+            let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+
+            if (canvasRatio > imgRatio) {
+                drawWidth = bgCanvas.width;
+                drawHeight = bgCanvas.width / imgRatio;
+                offsetY = (bgCanvas.height - drawHeight) / 2;
+            } else {
+                drawHeight = bgCanvas.height;
+                drawWidth = bgCanvas.height * imgRatio;
+                offsetX = (bgCanvas.width - drawWidth) / 2;
+            }
+
+            bgCtx.translate(bgCanvas.width, 0);
+            bgCtx.scale(-1, 1); // 鏡像翻轉
+            bgCtx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+            bgCtx.restore();
+
+            return { drawWidth, drawHeight, offsetX, offsetY };
+        }
+
+        // 生成水墨潑濺效果 (點墨)
+        function drawSplash(x, y, speed) {
+            if (Math.random() > 0.85 && speed > 8) {
+                const count = Math.floor(Math.random() * 3) + 1;
+                for (let i = 0; i < count; i++) {
+                    const sx = x + (Math.random() - 0.5) * (speed * 1.5);
+                    const sy = y + (Math.random() - 0.5) * (speed * 1.5);
+                    const sr = Math.random() * 1.5 + 0.5;
+                    drawCtx.beginPath();
+                    drawCtx.arc(sx, sy, sr, 0, Math.PI * 2);
+                    drawCtx.fillStyle = `rgba(220, 220, 230, ${Math.random() * 0.4 + 0.2})`;
+                    drawCtx.fill();
+                }
+            }
+        }
+
+        // 生成水墨梅花 + 播放音效
+        function drawFlower(x, y) {
+            // 播放開花音效
+            if (isMusicPlaying) {
+                bloomSound.currentTime = 0;
+                bloomSound.play().catch(e => console.log("Bloom sound failed:", e));
+            }
+
+            const colors = [
+                'rgba(244, 63, 94, 0.7)',  // Rose
+                'rgba(251, 113, 133, 0.75)', // Lighter Rose
+                'rgba(225, 29, 72, 0.65)'    // Darker Rose
+            ];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const petals = 5;
+            const radius = Math.random() * 12 + 8; // 花朵大小
+
+            drawCtx.save();
+            drawCtx.translate(x, y);
+            drawCtx.rotate(Math.random() * Math.PI);
+
+            // 花瓣
+            for (let i = 0; i < petals; i++) {
+                drawCtx.rotate((Math.PI * 2) / petals);
+                drawCtx.beginPath();
+                drawCtx.ellipse(radius, 0, radius, radius * 0.6, 0, 0, Math.PI * 2);
+                drawCtx.fillStyle = color;
+                drawCtx.shadowColor = 'rgba(244, 63, 94, 0.8)';
+                drawCtx.shadowBlur = 15;
+                drawCtx.fill();
+            }
+
+            // 花蕊
+            drawCtx.beginPath();
+            drawCtx.arc(0, 0, radius * 0.25, 0, Math.PI * 2);
+            drawCtx.fillStyle = 'rgba(30, 15, 20, 0.9)';
+            drawCtx.shadowBlur = 0;
+            drawCtx.fill();
+            
+            drawCtx.restore();
+        }
+
+        // 判斷手指是否伸直的輔助函式 (利用指尖與關節到手腕的距離作比較)
+        function isFingerExtended(landmarks, tipIdx, pipIdx) {
+            const wrist = landmarks[0];
+            const dTip = Math.hypot(landmarks[tipIdx].x - wrist.x, landmarks[tipIdx].y - wrist.y);
+            const dPip = Math.hypot(landmarks[pipIdx].x - wrist.x, landmarks[pipIdx].y - wrist.y);
+            return dTip > dPip;
+        }
+
+        // --- MediaPipe Hands 結果處理 ---
+        function onResults(results) {
+            if (!isLoaded) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 800);
+                isLoaded = true;
+            }
+
+            let layout = { drawWidth: bgCanvas.width, drawHeight: bgCanvas.height, offsetX: 0, offsetY: 0 };
+            if (results.image) {
+                layout = drawVideoBackground(results.image);
+            }
+
+            let anyBrushing = false; // 追蹤是否有任何手正在畫枝幹，用於控制音效
+
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                results.multiHandLandmarks.forEach((landmarks, index) => {
+                    if (index > 1) return; // 最多處理兩隻手
+
+                    const thumbTip = landmarks[4];
+                    const indexTip = landmarks[8];
+                    
+                    // 座標映射
+                    const rawX = bgCanvas.width - (layout.offsetX + indexTip.x * layout.drawWidth);
+                    const rawY = layout.offsetY + indexTip.y * layout.drawHeight;
+
+                    // 繪製追蹤光點
+                    bgCtx.beginPath();
+                    bgCtx.arc(rawX, rawY, 6, 0, 2 * Math.PI);
+                    bgCtx.fillStyle = 'rgba(255, 255, 255, 0.5)'; 
+                    bgCtx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+                    bgCtx.shadowBlur = 10;
+                    bgCtx.fill();
+                    bgCtx.shadowBlur = 0;
+
+                    // 1. 判斷是否捏合 (Pinch)
+                    const dist = Math.hypot(thumbTip.x - indexTip.x, thumbTip.y - indexTip.y);
+                    const currentPinching = dist < 0.15;
+
+                    // 2. 判斷是否比「1」
+                    const indexExtended = isFingerExtended(landmarks, 8, 6);
+                    const middleExtended = isFingerExtended(landmarks, 12, 10);
+                    const ringExtended = isFingerExtended(landmarks, 16, 14);
+                    const pinkyExtended = isFingerExtended(landmarks, 20, 18);
+                    const currentOneGesture = indexExtended && !middleExtended && !ringExtended && !pinkyExtended && !currentPinching;
+
+                    if (currentPinching) {
+                        bgCtx.beginPath();
+                        bgCtx.arc(rawX, rawY, 12, 0, 2 * Math.PI);
+                        bgCtx.fillStyle = 'rgba(244, 63, 94, 0.8)';
+                        bgCtx.fill();
+
+                        const now = Date.now();
+                        if (now - lastHeartTime > 150) {
+                            hearts.push(new Heart(rawX, rawY));
+                            lastHeartTime = now;
+                        }
+
+                        handStates[index].isPinching = true;
+                        handStates[index].lastX = rawX;
+                        handStates[index].lastY = rawY;
+                        
+                        handStates[index].isBrushing = false;
+                        handStates[index].brushLastX = null;
+                        handStates[index].brushLastY = null;
+                        
+                    } else {
+                        if (handStates[index].isPinching) {
+                            drawFlower(handStates[index].lastX, handStates[index].lastY);
+                            handStates[index].isPinching = false;
+                        }
+
+                        if (currentOneGesture) {
+                            bgCtx.beginPath();
+                            bgCtx.arc(rawX, rawY, 10, 0, 2 * Math.PI);
+                            bgCtx.fillStyle = 'rgba(200, 200, 255, 0.8)';
+                            bgCtx.fill();
+
+                            if (!handStates[index].isBrushing || handStates[index].brushLastX === null) {
+                                handStates[index].brushLastX = rawX;
+                                handStates[index].brushLastY = rawY;
+                                handStates[index].isBrushing = true;
+                            }
+
+                            const bx = handStates[index].brushLastX;
+                            const by = handStates[index].brushLastY;
+                            const speed = Math.hypot(rawX - bx, rawY - by);
+                            const brushSize = Math.max(2, 18 - speed * 0.5);
+
+                            drawCtx.beginPath();
+                            drawCtx.moveTo(bx, by);
+                            drawCtx.lineTo(rawX, rawY);
+                            drawCtx.lineWidth = brushSize;
+                            drawCtx.lineCap = 'round';
+                            drawCtx.lineJoin = 'round';
+                            drawCtx.strokeStyle = 'rgba(200, 200, 215, 0.85)';
+                            drawCtx.shadowColor = 'rgba(255, 255, 255, 0.3)';
+                            drawCtx.shadowBlur = 6;
+                            drawCtx.stroke();
+                            
+                            drawSplash(rawX, rawY, speed);
+
+                            handStates[index].brushLastX = rawX;
+                            handStates[index].brushLastY = rawY;
+                            anyBrushing = true;
+                        } else {
+                            handStates[index].isBrushing = false;
+                            handStates[index].brushLastX = null;
+                            handStates[index].brushLastY = null;
+                        }
+                    }
+                });
+            } else {
+                handStates.forEach(state => {
+                    if (state.isPinching) {
+                        drawFlower(state.lastX, state.lastY);
+                        state.isPinching = false;
+                    }
+                    state.isBrushing = false;
+                    state.brushLastX = null;
+                    state.brushLastY = null;
+                });
+            }
+
+            if (anyBrushing && isMusicPlaying) {
+                if (drawSound.paused) {
+                    drawSound.play().catch(e => console.log("Draw sound failed:", e));
+                }
+            } else {
+                drawSound.pause();
+            }
+        }
+
+        // --- 初始化 MediaPipe Hands ---
+        const hands = new Hands({locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+        }});
+
+        hands.setOptions({
+            maxNumHands: 2,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+        
+        hands.onResults(onResults);
+
+        // --- 啟動攝影機 ---
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await hands.send({image: videoElement});
+            },
+            width: 1280,
+            height: 720
+        });
+        
+        camera.start().catch(err => {
+            console.error("Camera error:", err);
+            loader.innerHTML = `
+                <div class="text-red-500 mb-4 text-4xl">📷❌</div>
+                <h2 class="text-xl font-bold text-gray-200">無法存取攝影機</h2>
+                <p class="text-gray-400 mt-2 text-sm">請確保您已授權瀏覽器使用攝影機，並重新整理頁面。</p>
+            `;
+        });
+
+        // --- UI 按鈕事件 ---
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            hearts = [];
+            drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+        });
+
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = drawCanvas.width;
+            tempCanvas.height = drawCanvas.height;
+            const tCtx = tempCanvas.getContext('2d');
+
+            const bgImg = document.getElementById('bgImage');
+            if (bgImg.complete && bgImg.naturalHeight !== 0) {
+                const canvasRatio = tempCanvas.width / tempCanvas.height;
+                const imgRatio = bgImg.naturalWidth / bgImg.naturalHeight;
+                let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+
+                if (canvasRatio > imgRatio) {
+                    drawWidth = tempCanvas.width;
+                    drawHeight = tempCanvas.width / imgRatio;
+                    offsetY = (tempCanvas.height - drawHeight) / 2;
+                } else {
+                    drawHeight = tempCanvas.height;
+                    drawWidth = tempCanvas.height * imgRatio;
+                    offsetX = (tempCanvas.width - drawWidth) / 2;
+                }
+                tCtx.drawImage(bgImg, offsetX, offsetY, drawWidth, drawHeight);
+            } else {
+                tCtx.fillStyle = '#0f1115';
+                tCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            }
+
+            tCtx.drawImage(bgCanvas, 0, 0); 
+            tCtx.drawImage(drawCanvas, 0, 0);
+
+            const link = document.createElement('a');
+            link.download = `ink-flower-forest-${new Date().getTime()}.png`;
+            link.href = tempCanvas.toDataURL('image/png');
+            link.click();
+        });
+
+    </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 /* =========================================================
-   何巧琳 老師 - 七合一旗艦數位教學儀表板 (Ultimate 7-in-1 Portal)
+   何巧琳 老師 - 九合一旗艦數位教學儀表板 (Ultimate 9-in-1 Portal)
    ========================================================= */
 
 :root {
@@ -102,7 +102,9 @@ body {
 .dashboard-grid.view-portal #scoreSection,
 .dashboard-grid.view-portal #lotterySection,
 .dashboard-grid.view-portal #whiteboardSection,
-.dashboard-grid.view-portal #flashcardSection { display: none; }
+.dashboard-grid.view-portal #flashcardSection,
+.dashboard-grid.view-portal #steamSection,
+.dashboard-grid.view-portal #interactiveSection { display: none; }
 .dashboard-grid.view-portal { grid-template-columns: 1fr; max-width: 1180px; }
 
 .dashboard-grid.view-card #portalSection,
@@ -110,7 +112,9 @@ body {
 .dashboard-grid.view-card #scoreSection,
 .dashboard-grid.view-card #lotterySection,
 .dashboard-grid.view-card #whiteboardSection,
-.dashboard-grid.view-card #flashcardSection { display: none; }
+.dashboard-grid.view-card #flashcardSection,
+.dashboard-grid.view-card #steamSection,
+.dashboard-grid.view-card #interactiveSection { display: none; }
 .dashboard-grid.view-card { grid-template-columns: 1fr; max-width: 460px; }
 
 .dashboard-grid.view-timer #portalSection,
@@ -118,7 +122,9 @@ body {
 .dashboard-grid.view-timer #scoreSection,
 .dashboard-grid.view-timer #lotterySection,
 .dashboard-grid.view-timer #whiteboardSection,
-.dashboard-grid.view-timer #flashcardSection { display: none; }
+.dashboard-grid.view-timer #flashcardSection,
+.dashboard-grid.view-timer #steamSection,
+.dashboard-grid.view-timer #interactiveSection { display: none; }
 .dashboard-grid.view-timer { grid-template-columns: 1fr; max-width: 480px; }
 
 .dashboard-grid.view-score #portalSection,
@@ -126,7 +132,9 @@ body {
 .dashboard-grid.view-score #timerSection,
 .dashboard-grid.view-score #lotterySection,
 .dashboard-grid.view-score #whiteboardSection,
-.dashboard-grid.view-score #flashcardSection { display: none; }
+.dashboard-grid.view-score #flashcardSection,
+.dashboard-grid.view-score #steamSection,
+.dashboard-grid.view-score #interactiveSection { display: none; }
 .dashboard-grid.view-score { grid-template-columns: 1fr; max-width: 1180px; }
 
 .dashboard-grid.view-lottery #portalSection,
@@ -134,7 +142,9 @@ body {
 .dashboard-grid.view-lottery #timerSection,
 .dashboard-grid.view-lottery #scoreSection,
 .dashboard-grid.view-lottery #whiteboardSection,
-.dashboard-grid.view-lottery #flashcardSection { display: none; }
+.dashboard-grid.view-lottery #flashcardSection,
+.dashboard-grid.view-lottery #steamSection,
+.dashboard-grid.view-lottery #interactiveSection { display: none; }
 .dashboard-grid.view-lottery { grid-template-columns: 1fr; max-width: 540px; }
 
 .dashboard-grid.view-whiteboard #portalSection,
@@ -142,7 +152,9 @@ body {
 .dashboard-grid.view-whiteboard #timerSection,
 .dashboard-grid.view-whiteboard #scoreSection,
 .dashboard-grid.view-whiteboard #lotterySection,
-.dashboard-grid.view-whiteboard #flashcardSection { display: none; }
+.dashboard-grid.view-whiteboard #flashcardSection,
+.dashboard-grid.view-whiteboard #steamSection,
+.dashboard-grid.view-whiteboard #interactiveSection { display: none; }
 .dashboard-grid.view-whiteboard { grid-template-columns: 1fr; max-width: 980px; }
 
 .dashboard-grid.view-flashcard #portalSection,
@@ -150,11 +162,35 @@ body {
 .dashboard-grid.view-flashcard #timerSection,
 .dashboard-grid.view-flashcard #scoreSection,
 .dashboard-grid.view-flashcard #lotterySection,
-.dashboard-grid.view-flashcard #whiteboardSection { display: none; }
+.dashboard-grid.view-flashcard #whiteboardSection,
+.dashboard-grid.view-flashcard #steamSection,
+.dashboard-grid.view-flashcard #interactiveSection { display: none; }
 .dashboard-grid.view-flashcard { grid-template-columns: 1fr; max-width: 520px; }
 
-.dashboard-grid.view-all #portalSection { display: none; }
+.dashboard-grid.view-all #portalSection,
+.dashboard-grid.view-all #steamSection,
+.dashboard-grid.view-all #interactiveSection { display: none; }
 .dashboard-grid.view-all { grid-template-columns: 1fr 1fr; max-width: 1180px; }
+
+.dashboard-grid.view-steam #portalSection,
+.dashboard-grid.view-steam #cardSection,
+.dashboard-grid.view-steam #timerSection,
+.dashboard-grid.view-steam #scoreSection,
+.dashboard-grid.view-steam #lotterySection,
+.dashboard-grid.view-steam #whiteboardSection,
+.dashboard-grid.view-steam #flashcardSection,
+.dashboard-grid.view-steam #interactiveSection { display: none; }
+.dashboard-grid.view-steam { grid-template-columns: 1fr; max-width: 1100px; }
+
+.dashboard-grid.view-interactive #portalSection,
+.dashboard-grid.view-interactive #cardSection,
+.dashboard-grid.view-interactive #timerSection,
+.dashboard-grid.view-interactive #scoreSection,
+.dashboard-grid.view-interactive #lotterySection,
+.dashboard-grid.view-interactive #whiteboardSection,
+.dashboard-grid.view-interactive #flashcardSection,
+.dashboard-grid.view-interactive #steamSection { display: none; }
+.dashboard-grid.view-interactive { grid-template-columns: 1fr; max-width: 1100px; }
 
 /* Component Cards Base */
 .teacher-card, .timer-container {

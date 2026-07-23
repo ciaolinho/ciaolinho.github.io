@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>森林運動會：球球特攻隊 🏆 幼兒智能動作分析互動網頁</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+    
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --bg-play: #F7FFF7;
+            --bg-report: #F0F4F8;
+            --text-main: #2F3E46;
+            --card-shadow: 0 8px 16px rgba(0,0,0,0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Microsoft JhengHei', sans-serif;
+        }
+
+        body {
+            background-color: #EDF2F7;
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 頂部導覽列 */
+        .navbar {
+            width: 100%;
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .brand {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: 1px 1px var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: #E2E8F0;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            color: #4A5568;
+        }
+
+        .nav-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* 主容器 */
+        .main-container {
+            width: 100%;
+            max-width: 1100px;
+            padding: 30px 20px;
+            display: block;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* 兒童互動遊戲區樣式 */
+        .game-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 25px;
+        }
+
+        @media (max-width: 900px) {
+            .game-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .center-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .game-menu {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .game-btn {
+            background-color: #EDF2F7;
+            color: #4A5568;
+            border: 3px solid #E2E8F0;
+            padding: 12px 24px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        .game-btn.active {
+            background-color: var(--secondary);
+            color: white;
+            border-color: #3ba8a0;
+            box-shadow: 0 4px 10px rgba(78, 205, 196, 0.4);
+        }
+
+        .camera-box {
+            position: relative;
+            width: 640px;
+            height: 480px;
+            background: #1A202C;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 6px solid #FFF;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        #video, #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 640px;
+            height: 480px;
+            transform: scaleX(-1);
+        }
+
+        #canvas {
+            z-index: 10;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.6rem;
+            font-weight: bold;
+            z-index: 100;
+            color: var(--primary);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid var(--primary);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 側邊引導與分數欄 */
+        .sidebar-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+            border-top: 6px solid var(--primary);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #2D3748;
+        }
+
+        .guide-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #4A5568;
+            background: #FFFDF5;
+            padding: 12px;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .score-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .badge-grid {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .badge-icon {
+            width: 50px;
+            height: 50px;
+            background: #EDF2F7;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            opacity: 0.3;
+        }
+
+        .badge-icon.unlocked {
+            opacity: 1;
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+
+        /* 儀表板 */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .radar-mock {
+            width: 100%;
+            height: 260px;
+            background: #F7FAFC;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 1px dashed #CBD5E0;
+        }
+
+        .radar-line {
+            position: absolute;
+            width: 180px;
+            height: 180px;
+            border: 2px solid #E2E8F0;
+            border-radius: 50%;
+        }
+        
+        .radar-label {
+            position: absolute;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #718096;
+        }
+        .rl-top { top: 15px; } .rl-bottom { bottom: 15px; } .rl-left { left: 15px; } .rl-right { right: 15px; }
+
+        .radar-poly {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0; left: 0;
+            z-index: 5;
+        }
+
+        .metrics-list { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+        .metric-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #F7FAFC; border-radius: 10px; }
+        .metric-name { font-weight: bold; font-size: 0.95rem; }
+        .progress-line-bg { width: 120px; background: #E2E8F0; height: 12px; border-radius: 6px; overflow: hidden; }
+        .progress-line-fill { background: var(--secondary); height: 100%; width: 0%; transition: width 0.5s; }
+        .advise-box { background: #F0FFF4; border-left: 4px solid #38A169; padding: 15px; border-radius: 8px; margin-top: 15px; font-size: 0.95rem; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="brand">🏃‍♂️ 森林運動會：球球特攻隊 AI 版</div>
+        <div class="nav-tabs">
+            <button class="nav-btn active" onclick="switchPage('play-page', this)">🎮 幼兒互動闖關區</button>
+            <button class="nav-btn" onclick="switchPage('report-page', this); updateReport();">📊 幼兒大肌肉發展報告</button>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div id="play-page" class="page active">
+            <div class="game-layout">
+                <div class="center-stage">
+                    <div class="game-menu">
+                        <button class="game-btn active" id="btn-basketball" onclick="setGameMode('basketball')">🏀 長頸鹿拍拍球</button>
+                        <button class="game-btn" id="btn-baseball" onclick="setGameMode('baseball')">⚾ 大熊揮棒棒</button>
+                        <button class="game-btn" id="btn-football" onclick="setGameMode('football')">⚽ 袋鼠射門王</button>
+                    </div>
+
+                    <div class="camera-box">
+                        <div id="loading-overlay" class="loading-overlay">
+                            <div class="spinner"></div>
+                            <div>🤖 AI 運動小教練正在召喚動物中...<br><span style="font-size:1rem; color:#A0AEC0; font-weight:normal;">請允許瀏覽器「開啟相機」以進行偵測</span></div>
+                        </div>
+                        <video id="video" autoplay playsinline muted></video>
+                        <canvas id="canvas"></canvas>
+                    </div>
+                </div>
+
+                <div class="sidebar-panel">
+                    <div class="info-card">
+                        <h3 class="card-title">🦉 貓頭鷹博士的口訣</h3>
+                        <div class="guide-text" id="guide-text">載入中...</div>
+                    </div>
+                    <div class="info-card" style="border-top-color: var(--secondary);">
+                        <h3 class="card-title" id="score-title">⭐ 星星獎勵</h3>
+                        <div class="score-display" id="score-num">0</div>
+                        <div class="badge-grid">
+                            <div class="badge-icon" id="badge-1">🥇</div>
+                            <div class="badge-icon" id="badge-2">🏆</div>
+                            <div class="badge-icon" id="badge-3">⚡</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="report-page" class="page">
+            <div class="dashboard-grid">
+                <div class="report-card">
+                    <h3 class="card-title" style="color:var(--secondary);">🎯 粗大動作基本運動技能 (FMS) 雷達圖</h3>
+                    <div class="radar-mock">
+                        <div class="radar-line"></div>
+                        <span class="radar-label rl-top">手眼操作</span>
+                        <span class="radar-label rl-bottom">足眼操作</span>
+                        <span class="radar-label rl-left">動態平衡</span>
+                        <span class="radar-label rl-right">軀幹旋轉</span>
+                        <svg class="radar-poly" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <polygon id="radar-shape" points="50,50 50,50 50,50 50,50" fill="rgba(76, 205, 196, 0.4)" stroke="#4ECDC4" stroke-width="1.5"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="report-card">
+                    <h3 class="card-title" style="color:var(--primary);">📋 幼兒專項球類動作發展分析</h3>
+                    <div class="metrics-list">
+                        <div class="metric-item"><span class="metric-name">🏀 籃球：連續控制與手眼配合</span><div class="progress-line-bg"><div class="progress-line-fill" id="bar-basketball"></div></div></div>
+                        <div class="metric-item"><span class="metric-name">⚾ 棒球：揮擊軌跡與核心旋轉</span><div class="progress-line-bg"><div class="progress-line-fill" id="bar-baseball"></div></div></div>
+                        <div class="metric-item"><span class="metric-name">⚽ 足球：單腳支撐與精準足眼</span><div class="progress-line-bg"><div class="progress-line-fill" id="bar-football"></div></div></div>
+                    </div>
+                    <div class="advise-box" id="advise-text">正在統整分析結果...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const guideText = document.getElementById('guide-text');
+        const scoreTitle = document.getElementById('score-title');
+        const scoreNum = document.getElementById('score-num');
+        
+        let detector;
+        let gameMode = 'basketball';
+        let dataRecords = { basketball: { current: 0 }, baseball: { current: 0 }, football: { current: 0 } };
+        let isWristDown = false;
+        let speakTimer = 0;
+
+        const modeConfigs = {
+            basketball: { guide: "『背背挺直看前面，大手掌像小章魚吸球球！』", title: "🏀 拍球次數", audio: "背背挺直看前面，大手掌像小章魚吸球球！" },
+            baseball: { guide: "『雙手握緊球棒，肚子扭轉，用力一揮！』", title: "⚾ 全壘打威力值", audio: "雙手握緊球棒，肚子扭轉，用力一揮！" },
+            football: { guide: "『一隻腳像大樹站穩，另外一隻腳用力踢球！』", title: "⚽ 射門次數", audio: "一隻腳像大樹站穩，另外一隻腳用力踢球！" }
+        };
+
+        function switchPage(pageId, btn) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function childVoiceSpeak(text) {
+            if (Date.now() - speakTimer < 3500) return;
+            speakTimer = Date.now();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-TW'; utterance.rate = 0.9;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function setGameMode(mode) {
+            gameMode = mode;
+            document.querySelectorAll('.game-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-${mode}`).classList.add('active');
+            guideText.innerText = modeConfigs[mode].guide;
+            scoreTitle.innerText = modeConfigs[mode].title;
+            scoreNum.innerText = dataRecords[mode].current;
+            updateBadges(dataRecords[mode].current);
+            childVoiceSpeak(modeConfigs[mode].audio);
+        }
+
+        function updateBadges(val) {
+            document.getElementById('badge-1').classList.toggle('unlocked', val >= 3);
+            document.getElementById('badge-2').classList.toggle('unlocked', val >= 8);
+            document.getElementById('badge-3').classList.toggle('unlocked', val >= 12 || (gameMode==='baseball' && val>=60));
+        }
+
+        async function initModel() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: "user" } });
+                video.srcObject = stream;
+                await new Promise(resolve => video.onloadedmetadata = () => resolve());
+                video.play();
+                canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+
+                detector = await poseDetection.createDetector(poseDetection.SupportedModels.MoveNet, 
+                    { modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING });
+
+                loadingOverlay.style.display = 'none';
+                setGameMode('basketball');
+                runDetectionLoop();
+            } catch (err) {
+                loadingOverlay.innerHTML = "❌ 找不到相機，或您未允許相機權限，無法進行動作分析。";
+            }
+        }
+
+        async function runDetectionLoop() {
+            const poses = await detector.estimatePoses(video);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (poses.length > 0) {
+                const keypoints = poses[0].keypoints;
+                keypoints.forEach(kp => {
+                    if (kp.score > 0.45) {
+                        ctx.beginPath(); ctx.arc(kp.x, kp.y, 7, 0, 2 * Math.PI);
+                        ctx.fillStyle = '#FFE66D'; ctx.fill();
+                    }
+                });
+
+                const getJoint = (name) => keypoints.find(k => k.name === name);
+                const lw = getJoint('left_wrist'), rw = getJoint('right_wrist'), lh = getJoint('left_hip');
+                const ls = getJoint('left_shoulder'), rs = getJoint('right_shoulder'), lk = getJoint('left_knee'), rk = getJoint('right_knee');
+
+                if (gameMode === 'basketball' && lw && lh) {
+                    if (lw.y > lh.y && !isWristDown) {
+                        isWristDown = true; dataRecords.basketball.current++;
+                        scoreNum.innerText = dataRecords.basketball.current; updateBadges(dataRecords.basketball.current);
+                    }
+                    if (lw.y < lh.y - 20) isWristDown = false;
+                }
+                if (gameMode === 'baseball' && ls && rs && rw && lw) {
+                    if (Math.abs(rw.x - lw.x) > Math.abs(ls.x - rs.x) * 1.6 && Date.now() % 60 === 0) {
+                        dataRecords.baseball.current += 10;
+                        if(dataRecords.baseball.current > 100) dataRecords.baseball.current = 100;
+                        scoreNum.innerText = dataRecords.baseball.current; updateBadges(dataRecords.baseball.current);
+                    }
+                }
+                if (gameMode === 'football' && lk && rk) {
+                    if (Math.abs(lk.y - rk.y) > 75 && Date.now() % 70 === 0) {
+                        dataRecords.football.current++;
+                        scoreNum.innerText = dataRecords.football.current; updateBadges(dataRecords.football.current);
+                    }
+                }
+            }
+            requestAnimationFrame(runDetectionLoop);
+        }
+
+        function updateReport() {
+            let fms_hand = Math.min((dataRecords.basketball.current / 12) * 100, 100) || 30;
+            let fms_trunk = Math.min((dataRecords.baseball.current / 80) * 100, 100) || 25;
+            let fms_foot = Math.min((dataRecords.football.current / 10) * 100, 100) || 30;
+            let fms_balance = Math.min(((dataRecords.football.current + dataRecords.basketball.current) / 18) * 100, 100) || 35;
+
+            document.getElementById('bar-basketball').style.width = `${fms_hand}%`;
+            document.getElementById('bar-baseball').style.width = `${fms_trunk}%`;
+            document.getElementById('bar-football').style.width = `${fms_foot}%`;
+
+            document.getElementById('radar-shape').setAttribute('points', 
+                `${50},${50 - (fms_hand*0.35)} ${50 + (fms_trunk*0.35)},${50} ${50},${50 + (fms_foot*0.35)} ${50 - (fms_balance*0.35)},${50}`
+            );
+
+            document.getElementById('advise-text').innerHTML = "💡 <b>大班發展適性引導方針：</b><br>這是一份根據幼兒剛才闖關的動態數據自動生成的專業分析回饋。若軀幹旋轉分數較低，建議多玩扭扭腰傳球遊戲喔！";
+        }
+
+        window.onload = initModel;
+    </script>
+</body>
+</html>

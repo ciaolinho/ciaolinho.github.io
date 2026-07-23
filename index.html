@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>何巧琳 老師 - 七合一全能數位教學儀表板</title>
+    <title>何巧琳 老師 - 九合一全能數位教學儀表板</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,6 +49,12 @@
             </button>
             <button class="tab-btn" onclick="switchView('flashcard', this)">
                 <i class="fa-solid fa-book-bookmark"></i> 成語閃卡
+            </button>
+            <button class="tab-btn" onclick="switchView('steam', this)">
+                <i class="fa-solid fa-gamepad"></i> STEAM 遊戲
+            </button>
+            <button class="tab-btn" onclick="switchView('interactive', this)">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> 互動遊戲
             </button>
             <button class="tab-btn" onclick="switchView('all', this)">
                 <i class="fa-solid fa-table-cells-large"></i> 全視角總覽
@@ -165,6 +171,40 @@
                     <div class="card-body">
                         <h2 class="card-title">知識閃卡工具</h2>
                         <p class="card-desc">古典風圓角造型，平滑 3D 翻轉查看成語注音與釋義題庫。</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="action-text">進入組件</span>
+                        <div class="action-icon"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+
+                <!-- Card 7: STEAM 遊戲資料 -->
+                <div class="portal-card card-7" onclick="switchView('steam')">
+                    <div class="card-shine"></div>
+                    <div class="card-header">
+                        <div class="card-icon-box"><span class="emoji-icon">🏃‍♂️</span></div>
+                        <span class="card-badge-mini">AI 互動</span>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="card-title">STEAM 遊戲資料</h2>
+                        <p class="card-desc">森林運動會 AI 版：包含長頸鹿拍拍球、大熊揮棒棒、袋鼠射門王等 AI 肢體互動遊戲與發展報告。</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="action-text">進入組件</span>
+                        <div class="action-icon"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+
+                <!-- Card 8: AI 互動生成藝術 -->
+                <div class="portal-card card-8" onclick="switchView('interactive')">
+                    <div class="card-shine"></div>
+                    <div class="card-header">
+                        <div class="card-icon-box"><span class="emoji-icon">🫰</span></div>
+                        <span class="card-badge-mini">AI 藝術</span>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="card-title">互動遊戲：手勢藝術</h2>
+                        <p class="card-desc">霓虹手勢愛心：利用 AI 手勢追蹤技術，比出食指畫水墨、捏起手指召喚霓虹愛心與梅花。</p>
                     </div>
                     <div class="card-footer">
                         <span class="action-text">進入組件</span>
@@ -451,6 +491,20 @@
                         下一題 <i class="fa-solid fa-chevron-right"></i>
                     </button>
                 </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7: STEAM Game Component -->
+        <section class="dashboard-section section-full-width" id="steamSection">
+            <div class="steam-container" style="width: 100%; height: 800px; border-radius: 24px; overflow: hidden; background: #0f172a; border: 4px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);">
+                <iframe src="08_STEAM/index.html" style="width: 100%; height: 100%; border: none;" allow="camera; microphone; geolocation" title="STEAM 遊戲資料"></iframe>
+            </div>
+        </section>
+
+        <!-- SECTION 8: Interactive Generative Art Component -->
+        <section class="dashboard-section section-full-width" id="interactiveSection">
+            <div class="interactive-container" style="width: 100%; height: 800px; border-radius: 24px; overflow: hidden; background: #0f1115; border: 4px solid rgba(255, 255, 255, 0.1); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);">
+                <iframe src="09_Interactive/index.html" style="width: 100%; height: 100%; border: none;" allow="camera; microphone; geolocation" title="互動遊戲：手勢藝術"></iframe>
             </div>
         </section>
 
