@@ -3,330 +3,459 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>教學功能卡牌傳送門 - Teaching Dashboard</title>
+    <title>何巧琳 老師 - 七合一全能數位教學儀表板</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #0b0f19;
-            --card-bg: rgba(17, 24, 39, 0.7);
-            --card-border: rgba(255, 255, 255, 0.08);
-            --text-primary: #f3f4f6;
-            --text-secondary: #9ca3af;
-            
-            /* Custom neon glows for each card category to create premium aesthetics */
-            --color-card1: #f472b6; /* pink */
-            --color-card2: #38bdf8; /* sky */
-            --color-card3: #a855f7; /* purple */
-            --color-card4: #fb923c; /* orange */
-            --color-card5: #10b981; /* emerald */
-            --color-card6: #6366f1; /* indigo */
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Outfit', 'Noto Sans TC', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* Tech decorative background blobs */
-        .blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(120px);
-            z-index: 0;
-            opacity: 0.15;
-            pointer-events: none;
-            animation: blob-float 15s infinite alternate;
-        }
-
-        .blob-1 {
-            width: 500px;
-            height: 500px;
-            background: #4f46e5;
-            top: -100px;
-            left: -100px;
-        }
-
-        .blob-2 {
-            width: 400px;
-            height: 400px;
-            background: #ec4899;
-            bottom: -50px;
-            right: -50px;
-            animation-delay: -5s;
-        }
-
-        @keyframes blob-float {
-            0% { transform: translate(0, 0) scale(1); }
-            100% { transform: translate(60px, 40px) scale(1.1); }
-        }
-
-        .dashboard-container {
-            width: 100%;
-            max-width: 1100px;
-            z-index: 10;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        h1 {
-            font-size: 38px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-            background: linear-gradient(135deg, #f3f4f6 30%, #9ca3af 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .subtitle {
-            font-size: 16px;
-            color: var(--text-secondary);
-            font-weight: 400;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .teacher-badge {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 13px;
-            color: #f472b6;
-            font-weight: 600;
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 28px;
-            width: 100%;
-        }
-
-        .card-link {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            padding: 36px 30px;
-            height: 100%;
-            min-height: 220px;
-            box-shadow: 
-                0 10px 30px rgba(0, 0, 0, 0.5),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        /* Glowing indicator on hover */
-        .card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--glow-color);
-            opacity: 0.3;
-            transition: opacity 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-8px) scale(1.02);
-            border-color: var(--glow-color);
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.6),
-                0 0 25px var(--glow-shadow);
-        }
-
-        .card:hover::after {
-            opacity: 1;
-        }
-
-        .card-top {
-            margin-bottom: 24px;
-        }
-
-        .icon-box {
-            width: 52px;
-            height: 52px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 26px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .card:hover .icon-box {
-            background: var(--glow-shadow);
-            border-color: var(--glow-color);
-            transform: scale(1.1);
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 8px;
-            letter-spacing: 0.5px;
-        }
-
-        .card-description {
-            font-size: 14px;
-            color: var(--text-secondary);
-            line-height: 1.5;
-        }
-
-        .card-footer {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--glow-color);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            opacity: 0.8;
-            transition: gap 0.3s ease;
-            margin-top: 10px;
-        }
-
-        .card:hover .card-footer {
-            gap: 8px;
-            opacity: 1;
-        }
-
-        /* Grid card assignments */
-        .card-1 { --glow-color: var(--color-card1); --glow-shadow: rgba(244, 114, 182, 0.15); }
-        .card-2 { --glow-color: var(--color-card2); --glow-shadow: rgba(56, 189, 248, 0.15); }
-        .card-3 { --glow-color: var(--color-card3); --glow-shadow: rgba(168, 85, 247, 0.15); }
-        .card-4 { --glow-color: var(--color-card4); --glow-shadow: rgba(251, 146, 96, 0.15); }
-        .card-5 { --glow-color: var(--color-card5); --glow-shadow: rgba(16, 185, 129, 0.15); }
-        .card-6 { --glow-color: var(--color-card6); --glow-shadow: rgba(99, 102, 241, 0.15); }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=Outfit:wght@400;600;700;800;900&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../style.css?v=2">
 </head>
 <body>
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-
-    <div class="dashboard-container">
-        <header>
-            <h1>教學功能卡牌傳送門</h1>
-            <div class="subtitle">
-                <span class="teacher-badge">何巧琳 老師</span>
-                <span>專屬智慧課堂工具箱</span>
-            </div>
-        </header>
-
-        <div class="grid-container">
-            <!-- Card 1: Teacher Card -->
-            <a href="../01_Card/index.html" target="_blank" class="card-link">
-                <div class="card card-1">
-                    <div class="card-top">
-                        <div class="icon-box">👩‍⚕️</div>
-                        <h2 class="card-title">數位教師名片</h2>
-                        <p class="card-description">何巧琳 老師的簡介與授課科目說明，帶您深入健康護理專業領域。</p>
-                    </div>
-                    <div class="card-footer">開啟傳送門 &rarr;</div>
-                </div>
-            </a>
-
-            <!-- Card 2: Timer -->
-            <a href="../02_Timer/index.html" target="_blank" class="card-link">
-                <div class="card card-2">
-                    <div class="card-top">
-                        <div class="icon-box">⏳</div>
-                        <h2 class="card-title">課堂倒數計時器</h2>
-                        <p class="card-description">課堂分組討論與演練計時，倒數完畢自動閃爍並播放語音聲響提示。</p>
-                    </div>
-                    <div class="card-footer">開啟傳送門 &rarr;</div>
-                </div>
-            </a>
-
-            <!-- Card 3: Scoreboard -->
-            <a href="../03_Score/index.html" target="_blank" class="card-link">
-                <div class="card card-3">
-                    <div class="card-top">
-                        <div class="icon-box">👑</div>
-                        <h2 class="card-title">小組計分板</h2>
-                        <p class="card-description">分組搶答與課堂互動計分板，自動追蹤領先組別並套用皇冠高亮效果。</p>
-                    </div>
-                    <div class="card-footer">開啟傳送門 &rarr;</div>
-                </div>
-            </a>
-
-            <!-- Card 4: Lottery -->
-            <a href="../04_Lottery/index.html" target="_blank" class="card-link">
-                <div class="card card-4">
-                    <div class="card-top">
-                        <div class="icon-box">🎡</div>
-                        <h2 class="card-title">隨機點名抽籤</h2>
-                        <p class="card-description">隨機點名抽籤工具，支援名單編輯、跑馬燈滾動特效與粒子碎紙慶祝效果。</p>
-                    </div>
-                    <div class="card-footer">開啟傳送門 &rarr;</div>
-                </div>
-            </a>
-
-            <!-- Card 5: Whiteboard -->
-            <a href="../05_Whiteboard/index.html" target="_blank" class="card-link">
-                <div class="card card-5">
-                    <div class="card-top">
-                        <div class="icon-box">🖌</div>
-                        <h2 class="card-title">隨堂電子白板</h2>
-                        <p class="card-description">手寫板與塗鴉教學白板，支援多色筆觸、筆跡粗細、格線背景與歷史步驟復原。</p>
-                    </div>
-                    <div class="card-footer">開啟傳送門 &rarr;</div>
-                </div>
-            </a>
-
-            <!-- Card 6: Flashcard -->
-            <a href="../06_Flashcard/index.html" target="_blank" class="card-link">
-                <div class="card card-6">
-                    <div class="card-top">
-                        <div class="icon-box">🎴</div>
-                        <h2 class="card-title">知識閃卡工具</h2>
-                        <p class="card-description">3D 立體旋轉單字卡片與知識點自測卡，幫助學生加深概念與課堂複習。</p>
-                    </div>
-                    <div class="card-footer">開啟傳送門 &rarr;</div>
-                </div>
-            </a>
-        </div>
+    <!-- Tech Ambient Sunset Glow -->
+    <div class="tech-ambient">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+        <div class="grid-overlay"></div>
     </div>
+
+    <!-- Navigation Header -->
+    <header class="app-header">
+        <div class="logo">
+            <i class="fa-solid fa-stethoscope"></i>
+            <span>巧琳老師專屬教學儀表板</span>
+        </div>
+        <!-- View Mode Switcher -->
+        <nav class="view-tabs">
+            <button class="tab-btn active" onclick="switchView('portal', this)">
+                <i class="fa-solid fa-rocket"></i> 卡牌傳送門
+            </button>
+            <button class="tab-btn" onclick="switchView('card', this)">
+                <i class="fa-solid fa-address-card"></i> 數位名片
+            </button>
+            <button class="tab-btn" onclick="switchView('timer', this)">
+                <i class="fa-solid fa-stopwatch"></i> 倒數計時器
+            </button>
+            <button class="tab-btn" onclick="switchView('score', this)">
+                <i class="fa-solid fa-trophy"></i> 小組計分板
+            </button>
+            <button class="tab-btn" onclick="switchView('lottery', this)">
+                <i class="fa-solid fa-dice"></i> 隨機抽籤
+            </button>
+            <button class="tab-btn" onclick="switchView('whiteboard', this)">
+                <i class="fa-solid fa-pen-ruler"></i> 電子白板
+            </button>
+            <button class="tab-btn" onclick="switchView('flashcard', this)">
+                <i class="fa-solid fa-book-bookmark"></i> 成語閃卡
+            </button>
+            <button class="tab-btn" onclick="switchView('all', this)">
+                <i class="fa-solid fa-table-cells-large"></i> 全視角總覽
+            </button>
+        </nav>
+    </header>
+
+    <!-- Main Dashboard Grid Layout -->
+    <main class="dashboard-grid view-portal" id="mainDashboard">
+        
+        <!-- SECTION 0: Launcher Portal Component -->
+        <section class="dashboard-section section-full-width" id="portalSection">
+            <div class="portal-header">
+                <div class="portal-badge">
+                    <i class="fa-solid fa-sparkles"></i> 何巧琳 老師專屬・健康護理與智慧課堂
+                </div>
+                <h1 class="portal-title">教學功能傳送門</h1>
+                <p class="portal-subtitle">一鍵點擊切換完整教學工具箱 • 輕鬆開啟課堂互動體驗</p>
+            </div>
+
+            <div class="portal-grid">
+                <!-- Card 1: 數位教師名片 -->
+                <div class="portal-card card-1" onclick="switchView('card')">
+                    <div class="card-shine"></div>
+                    <div class="card-header">
+                        <div class="card-icon-box"><span class="emoji-icon">👩‍⚕️</span></div>
+                        <span class="card-badge-mini">個人品牌</span>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="card-title">數位教師名片</h2>
+                        <p class="card-desc">個人專屬品牌名片，包含健康護理專業領域、授課科目介紹與聯絡信箱。</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="action-text">進入組件</span>
+                        <div class="action-icon"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+
+                <!-- Card 2: 課堂倒數計時器 -->
+                <div class="portal-card card-2" onclick="switchView('timer')">
+                    <div class="card-shine"></div>
+                    <div class="card-header">
+                        <div class="card-icon-box"><span class="emoji-icon">⏱️</span></div>
+                        <span class="card-badge-mini">時間管理</span>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="card-title">課堂倒數計時器</h2>
+                        <p class="card-desc">大字體圓環進度條、預設時間快選與 00:00 醒目紅字與畫面閃爍提醒。</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="action-text">進入組件</span>
+                        <div class="action-icon"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+
+                <!-- Card 3: 小組計分板 -->
+                <div class="portal-card card-3" onclick="switchView('score')">
+                    <div class="card-shine"></div>
+                    <div class="card-header">
+                        <div class="card-icon-box"><span class="emoji-icon">🏆</span></div>
+                        <span class="card-badge-mini">課堂競賽</span>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="card-title">小組計分板</h2>
+                        <p class="card-desc">第一至六組即時競賽得分，最高分小組分數自動紅字與👑皇冠標示。</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="action-text">進入組件</span>
+                        <div class="action-icon"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+
+                <!-- Card 4: 隨機點名抽籤 -->
+                <div class="portal-card card-4" onclick="switchView('lottery')">
+                    <div class="card-shine"></div>
+                    <div class="card-header">
+                        <div class="card-icon-box"><span class="emoji-icon">🎲</span></div>
+                        <span class="card-badge-mini">隨機互動</span>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="card-title">隨機點名抽籤</h2>
+                        <p class="card-desc">大按鈕幸運抽選，具備滾動亂數、彈跳慶祝動畫與名單編輯。</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="action-text">進入組件</span>
+                        <div class="action-icon"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+
+                <!-- Card 5: 隨堂電子白板 -->
+                <div class="portal-card card-5" onclick="switchView('whiteboard')">
+                    <div class="card-shine"></div>
+                    <div class="card-header">
+                        <div class="card-icon-box"><span class="emoji-icon">🖍️</span></div>
+                        <span class="card-badge-mini">隨堂繪圖</span>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="card-title">隨堂電子白板</h2>
+                        <p class="card-desc">擬真金屬邊框畫布，支援 6 色畫筆自由切換、橡皮擦與一鍵清除。</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="action-text">進入組件</span>
+                        <div class="action-icon"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+
+                <!-- Card 6: 知識閃卡工具 -->
+                <div class="portal-card card-6" onclick="switchView('flashcard')">
+                    <div class="card-shine"></div>
+                    <div class="card-header">
+                        <div class="card-icon-box"><span class="emoji-icon">📜</span></div>
+                        <span class="card-badge-mini">語文素養</span>
+                    </div>
+                    <div class="card-body">
+                        <h2 class="card-title">知識閃卡工具</h2>
+                        <p class="card-desc">古典風圓角造型，平滑 3D 翻轉查看成語注音與釋義題庫。</p>
+                    </div>
+                    <div class="card-footer">
+                        <span class="action-text">進入組件</span>
+                        <div class="action-icon"><i class="fa-solid fa-arrow-right"></i></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 1: Digital Teacher Card Component -->
+        <section class="dashboard-section" id="cardSection">
+            <article class="teacher-card">
+                <div class="card-badge">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> 數位教師名片
+                </div>
+
+                <div class="profile-header">
+                    <div class="avatar-wrapper">
+                        <div class="avatar">
+                            <div class="avatar-emoji-box">
+                                <span class="emoji-icon" style="font-size: 52px; user-select: none;">👩‍⚕️</span>
+                            </div>
+                        </div>
+                        <span class="status-indicator" title="健康護理教學中"></span>
+                    </div>
+                    
+                    <h1 class="teacher-name">
+                        何巧琳 <span class="title-badge">老師</span>
+                    </h1>
+                    
+                    <div class="subject-tag">
+                        <i class="fa-solid fa-stethoscope"></i>
+                        <span>健康護理領域</span>
+                    </div>
+                </div>
+
+                <div class="motto-box">
+                    <div class="quote-bg"><i class="fa-solid fa-quote-right"></i></div>
+                    <p class="motto-label">Welcome Slogan</p>
+                    <h2 class="motto-text">「用心護理，智慧學習！」</h2>
+                    <p class="motto-subtext">帶你深入健康護理 • 開創智慧學習新世紀</p>
+                </div>
+
+                <div class="contact-info">
+                    <a href="mailto:ciaolinho@example.com" class="contact-item" title="點擊發送 Email 給老師">
+                        <div class="contact-icon"><i class="fa-solid fa-envelope"></i></div>
+                        <div class="contact-details">
+                            <span class="contact-label">聯絡信箱 Contact E-Mail</span>
+                            <span class="contact-value">ciaolinho@example.com</span>
+                        </div>
+                        <i class="fa-solid fa-arrow-up-right-from-square contact-arrow"></i>
+                    </a>
+                </div>
+
+                <div class="feature-pills">
+                    <span class="pill"><i class="fa-solid fa-user-doctor"></i> 臨床護理素養</span>
+                    <span class="pill"><i class="fa-solid fa-heart-pulse"></i> 兒童與社區護理</span>
+                    <span class="pill"><i class="fa-solid fa-graduation-cap"></i> 智慧教學融入</span>
+                </div>
+
+                <div class="card-actions">
+                    <a href="mailto:ciaolinho@example.com" class="btn btn-primary">
+                        <i class="fa-solid fa-paper-plane"></i> 聯絡老師
+                    </a>
+                    <button class="btn btn-secondary" onclick="alert('歡迎來到護理學課堂！請準備好您的教材。')">
+                        <i class="fa-solid fa-hospital"></i> 線上教室
+                    </button>
+                </div>
+
+                <footer class="card-footer">
+                    <span><i class="fa-solid fa-graduation-cap"></i> 啟發創新・寓教於樂</span>
+                </footer>
+            </article>
+        </section>
+
+        <!-- SECTION 2: Classroom Timer Component -->
+        <section class="dashboard-section" id="timerSection">
+            <div class="timer-container" id="timerContainer">
+                <header class="timer-header">
+                    <div class="badge"><i class="fa-solid fa-clock"></i> 巧琳老師課堂專用</div>
+                    <h2 class="timer-title">課堂倒數計時器</h2>
+                </header>
+
+                <div class="timer-display-wrapper">
+                    <svg class="progress-ring" width="270" height="270">
+                        <circle class="progress-ring__circle-bg" stroke-width="12" fill="transparent" r="115" cx="135" cy="135"/>
+                        <circle class="progress-ring__circle" id="progressRing" stroke-width="12" fill="transparent" r="115" cx="135" cy="135"/>
+                    </svg>
+                    
+                    <div class="time-center-box">
+                        <div class="timer-display" id="timeDisplay">10:00</div>
+                        <div class="timer-status" id="timerStatus">準備就緒</div>
+                    </div>
+                </div>
+
+                <div class="preset-buttons">
+                    <button class="preset-btn" onclick="setPreset(1, this)">1 分鐘</button>
+                    <button class="preset-btn" onclick="setPreset(3, this)">3 分鐘</button>
+                    <button class="preset-btn" onclick="setPreset(5, this)">5 分鐘</button>
+                    <button class="preset-btn active" onclick="setPreset(10, this)">10 分鐘</button>
+                    <button class="preset-btn" onclick="setPreset(15, this)">15 分鐘</button>
+                </div>
+
+                <div class="control-buttons">
+                    <button class="btn btn-start" id="startBtn" onclick="startTimer()">
+                        <i class="fa-solid fa-play"></i> 開始
+                    </button>
+                    <button class="btn btn-pause" id="pauseBtn" onclick="pauseTimer()" disabled>
+                        <i class="fa-solid fa-pause"></i> 暫停
+                    </button>
+                    <button class="btn btn-reset" id="resetBtn" onclick="resetTimer()">
+                        <i class="fa-solid fa-rotate-right"></i> 重置
+                    </button>
+                </div>
+
+                <div class="sound-toggle">
+                    <button class="sound-btn" id="soundBtn" onclick="toggleSound()">
+                        <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+                        <span id="soundLabel">時間結束提示音：開啟</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Classroom Scoreboard Component -->
+        <section class="dashboard-section section-full-width" id="scoreSection">
+            <div class="scoreboard-container">
+                <header class="scoreboard-header">
+                    <div class="badge"><i class="fa-solid fa-trophy"></i> 課堂分組競賽</div>
+                    <h2 class="scoreboard-title">🏆 課堂小組計分板</h2>
+                    <p class="scoreboard-subtitle">最高分小組分數將以<span class="highlight-red">顯眼紅色</span>與👑皇冠特別標示！</p>
+                </header>
+
+                <div class="control-bar">
+                    <button class="action-btn reset-btn" onclick="resetAllScores()">
+                        <i class="fa-solid fa-rotate-right"></i> 重置所有小組分數
+                    </button>
+                </div>
+
+                <div class="teams-grid" id="teamsGrid">
+                    <!-- Dynamic JavaScript rendering for 6 Teams -->
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Random Lottery Component -->
+        <section class="dashboard-section section-full-width" id="lotterySection">
+            <div class="lottery-container">
+                <header class="lottery-header">
+                    <div class="badge"><i class="fa-solid fa-gift"></i> 課堂互動抽籤</div>
+                    <h2 class="lottery-title">🎲 隨機抽籤點名工具</h2>
+                </header>
+
+                <div class="action-section">
+                    <button class="draw-btn" id="drawBtn" onclick="drawWinner()">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> 抽出幸運兒
+                    </button>
+                </div>
+
+                <div class="winner-display-box" id="winnerBox">
+                    <div class="winner-label" id="winnerLabel">點擊上方大按鈕開始抽籤！</div>
+                    <div class="winner-name" id="winnerName">❓</div>
+                </div>
+
+                <div class="roster-section">
+                    <div class="roster-header">
+                        <h3><i class="fa-solid fa-users"></i> 學生抽籤名單編輯</h3>
+                        <span class="roster-count" id="rosterCount">共 6 人</span>
+                    </div>
+                    <textarea id="rosterInput" class="roster-textarea" placeholder="請輸入名單..." oninput="updateRosterCount()">武今天, 甄快樂, 右學到, 辛ＡＩ, 辛技能, 郝幸福</textarea>
+                    
+                    <div class="roster-actions">
+                        <button class="btn-update" onclick="updateRoster()">
+                            <i class="fa-solid fa-rotate"></i> 更新抽籤名單
+                        </button>
+                        <label class="toggle-label">
+                            <input type="checkbox" id="noRepeatToggle">
+                            <span>避免重複抽中</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: Classroom Whiteboard Component -->
+        <section class="dashboard-section section-full-width" id="whiteboardSection">
+            <div class="whiteboard-container">
+                <header class="whiteboard-header">
+                    <div class="badge"><i class="fa-solid fa-pen-ruler"></i> 課堂手寫工具</div>
+                    <h2 class="whiteboard-title">🖍&nbsp;簡易隨堂電子白板</h2>
+                </header>
+
+                <div class="board-frame">
+                    <div class="toolbar">
+                        <div class="color-palette">
+                            <button class="color-btn black active" onclick="setPenColor('#1e1e1e', this)">
+                                <span class="color-dot" style="background:#1e1e1e"></span> 黑色
+                            </button>
+                            <button class="color-btn red" onclick="setPenColor('#ef233c', this)">
+                                <span class="color-dot" style="background:#ef233c"></span> 紅色
+                            </button>
+                            <button class="color-btn orange" onclick="setPenColor('#f77f00', this)">
+                                <span class="color-dot" style="background:#f77f00"></span> 橘色
+                            </button>
+                            <button class="color-btn green" onclick="setPenColor('#2b9348', this)">
+                                <span class="color-dot" style="background:#2b9348"></span> 綠色
+                            </button>
+                            <button class="color-btn purple" onclick="setPenColor('#7209b7', this)">
+                                <span class="color-dot" style="background:#7209b7"></span> 紫色
+                            </button>
+                            <button class="color-btn blue" onclick="setPenColor('#0077b6', this)">
+                                <span class="color-dot" style="background:#0077b6"></span> 藍色
+                            </button>
+                        </div>
+
+                        <div class="tool-actions">
+                            <button class="tool-btn" id="eraserBtn" onclick="enableEraser(this)">
+                                <i class="fa-solid fa-eraser"></i> 橡皮擦
+                            </button>
+                            <button class="tool-btn btn-clear" onclick="clearCanvas()">
+                                <i class="fa-solid fa-trash-can"></i> 全部清除
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="canvas-wrapper">
+                        <canvas id="whiteboardCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: Flashcard Component -->
+        <section class="dashboard-section section-full-width" id="flashcardSection">
+            <div class="flashcard-container">
+                <header class="flashcard-header">
+                    <div class="badge"><i class="fa-solid fa-book-bookmark"></i> 課堂複習工具</div>
+                    <h2 class="flashcard-title">🎴 成語知識閃卡</h2>
+                    <p class="flashcard-subtitle">點擊卡片自由 3D 翻轉・輕鬆掌握成語精髓</p>
+                </header>
+
+                <div class="card-scene">
+                    <div class="flashcard" id="flashcard" onclick="flipCard()">
+                        <div class="card-face card-front">
+                            <div class="card-corner corner-tl"></div>
+                            <div class="card-corner corner-tr"></div>
+                            <div class="card-corner corner-bl"></div>
+                            <div class="card-corner corner-br"></div>
+                            
+                            <div class="card-tag"><i class="fa-solid fa-stamp"></i> 成語卡</div>
+                            <div class="card-word" id="frontWord">一心一意</div>
+                            <div class="flip-hint"><i class="fa-solid fa-rotate"></i> 點擊卡片看釋義</div>
+                        </div>
+
+                        <div class="card-face card-back">
+                            <div class="card-corner corner-tl"></div>
+                            <div class="card-corner corner-tr"></div>
+                            <div class="card-corner corner-bl"></div>
+                            <div class="card-corner corner-br"></div>
+
+                            <div class="card-tag back-tag"><i class="fa-solid fa-scroll"></i> 成語釋義</div>
+                            <div class="back-pinyin" id="backPinyin">yī xīn yī yì</div>
+                            <div class="back-meaning" id="backMeaning">形容心思專一，毫無雜念。</div>
+                            <div class="flip-hint"><i class="fa-solid fa-rotate"></i> 點擊卡片返回正面</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-bar-container">
+                    <span class="progress-text" id="progressText">卡片 1 / 12</span>
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progressFill" style="width: 8.33%;"></div>
+                    </div>
+                </div>
+
+                <div class="nav-controls">
+                    <button class="nav-btn btn-prev" id="prevBtn" onclick="prevCard()">
+                        <i class="fa-solid fa-chevron-left"></i> 上一題
+                    </button>
+                    <button class="nav-btn btn-random" onclick="randomCard()" title="隨機抽考">
+                        <i class="fa-solid fa-shuffle"></i> 隨機題目
+                    </button>
+                    <button class="nav-btn btn-next" id="nextBtn" onclick="nextCard()">
+                        下一題 <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="../script.js?v=2"></script>
 </body>
 </html>
