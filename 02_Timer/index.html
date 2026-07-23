@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>課堂倒數計時器</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-color: #f8fafc;
+            --accent-color: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.4);
+            --danger-color: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.4);
+            --success-color: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        body.alarm-active {
+            animation: pulse-bg 1s infinite alternate;
+        }
+
+        @keyframes pulse-bg {
+            0% { background-color: #0f172a; }
+            100% { background-color: #450a0a; }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            padding: 40px 30px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #94a3b8;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timer-circle-container {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            margin: 0 auto 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .timer-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .timer-track {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 8px;
+        }
+
+        .timer-progress {
+            fill: none;
+            stroke: var(--accent-color);
+            stroke-width: 8px;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s linear, stroke 0.3s ease;
+            filter: drop-shadow(0 0 6px var(--accent-glow));
+        }
+
+        .timer-progress.danger {
+            stroke: var(--danger-color);
+            filter: drop-shadow(0 0 10px var(--danger-glow));
+        }
+
+        .time-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 56px;
+            font-weight: 700;
+            color: var(--text-color);
+            z-index: 5;
+            transition: color 0.3s ease;
+        }
+
+        .time-display.danger {
+            color: var(--danger-color);
+            animation: pulse-text 0.5s infinite alternate;
+        }
+
+        @keyframes pulse-text {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+
+        .presets {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            font-family: 'Outfit', sans-serif;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-start {
+            background: var(--accent-color);
+            color: #0f172a;
+            box-shadow: 0 4px 14px var(--accent-glow);
+        }
+
+        .btn-start:hover {
+            background: #7dd3fc;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+
+        .btn-pause {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-pause:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .btn-reset {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-reset:hover {
+            background: rgba(239, 68, 68, 0.25);
+            transform: translateY(-2px);
+        }
+
+        /* Time input settings toggler */
+        .custom-time-input {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .custom-time-input input {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            width: 60px;
+            padding: 6px;
+            border-radius: 8px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+        }
+
+        .custom-time-input input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span>⏳</span>課堂倒數計時器</h1>
+
+        <div class="timer-circle-container">
+            <svg class="timer-svg" viewBox="0 0 100 100">
+                <circle class="timer-track" cx="50" cy="50" r="46"></circle>
+                <circle class="timer-progress" id="progressRing" cx="50" cy="50" r="46" stroke-dasharray="289" stroke-dashoffset="0"></circle>
+            </svg>
+            <div class="time-display" id="timeDisplay">05:00</div>
+        </div>
+
+        <div class="presets">
+            <button class="preset-btn" onclick="setPreset(1)">1 分鐘</button>
+            <button class="preset-btn" onclick="setPreset(3)">3 分鐘</button>
+            <button class="preset-btn" onclick="setPreset(5)">5 分鐘</button>
+            <button class="preset-btn" onclick="setPreset(10)">10 分鐘</button>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-start" id="startBtn" onclick="startTimer()">▶ 開始</button>
+            <button class="btn btn-pause" id="pauseBtn" onclick="pauseTimer()">⏸ 暫停</button>
+            <button class="btn btn-reset" onclick="resetTimer()">🔄 重置</button>
+        </div>
+
+        <div class="custom-time-input">
+            <span>設定時間：</span>
+            <input type="number" id="minutesInput" min="0" max="99" value="5">
+            <span>分</span>
+            <input type="number" id="secondsInput" min="0" max="59" value="0">
+            <span>秒</span>
+        </div>
+    </div>
+
+    <script>
+        let duration = 300; // default 5 minutes
+        let timeRemaining = duration;
+        let timerInterval = null;
+        let isRunning = false;
+
+        const timeDisplay = document.getElementById('timeDisplay');
+        const progressRing = document.getElementById('progressRing');
+        const startBtn = document.getElementById('startBtn');
+        const minutesInput = document.getElementById('minutesInput');
+        const secondsInput = document.getElementById('secondsInput');
+
+        // Audio Context for built-in Synthesizer alarm beeps (no static assets needed)
+        let audioCtx = null;
+        function playBeep(frequency, duration) {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.frequency.value = frequency;
+                osc.type = 'sine';
+                
+                gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration - 0.05);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.error("Audio error", e);
+            }
+        }
+
+        let beepInterval = null;
+        function startAlarmEffect() {
+            document.body.classList.add('alarm-active');
+            timeDisplay.classList.add('danger');
+            progressRing.classList.add('danger');
+            
+            // Beep every 0.8s
+            if (!beepInterval) {
+                playBeep(880, 0.4); // immediate beep
+                beepInterval = setInterval(() => {
+                    playBeep(880, 0.4);
+                }, 800);
+            }
+        }
+
+        function stopAlarmEffect() {
+            document.body.classList.remove('alarm-active');
+            timeDisplay.classList.remove('danger');
+            progressRing.classList.remove('danger');
+            if (beepInterval) {
+                clearInterval(beepInterval);
+                beepInterval = null;
+            }
+        }
+
+        function updateDisplay() {
+            const mins = Math.floor(timeRemaining / 60);
+            const secs = timeRemaining % 60;
+            timeDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+            // Calculate SVG Dash Offset (Circle perimeter is 2 * PI * 46 ≈ 289)
+            const strokeDashOffset = 289 - (timeRemaining / duration) * 289;
+            progressRing.style.strokeDashoffset = strokeDashOffset;
+
+            // Danger class if under 10%
+            if (timeRemaining <= 10 && timeRemaining > 0) {
+                progressRing.classList.add('danger');
+                timeDisplay.classList.add('danger');
+            } else if (timeRemaining > 10) {
+                progressRing.classList.remove('danger');
+                timeDisplay.classList.remove('danger');
+            }
+        }
+
+        function startTimer() {
+            if (isRunning) return;
+            
+            // Resume context if suspended
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            // Sync inputs if not paused but configured differently
+            if (timeRemaining === duration && !timerInterval) {
+                const inputMins = parseInt(minutesInput.value) || 0;
+                const inputSecs = parseInt(secondsInput.value) || 0;
+                duration = (inputMins * 60) + inputSecs;
+                if (duration <= 0) duration = 300; // default backup
+                timeRemaining = duration;
+            }
+
+            isRunning = true;
+            startBtn.disabled = true;
+            
+            timerInterval = setInterval(() => {
+                if (timeRemaining > 0) {
+                    timeRemaining--;
+                    updateDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    isRunning = false;
+                    startBtn.disabled = false;
+                    startAlarmEffect();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            if (!isRunning) return;
+            clearInterval(timerInterval);
+            timerInterval = null;
+            isRunning = false;
+            startBtn.disabled = false;
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            stopAlarmEffect();
+            
+            // Sync current inputs
+            const inputMins = parseInt(minutesInput.value) || 0;
+            const inputSecs = parseInt(secondsInput.value) || 0;
+            duration = (inputMins * 60) + inputSecs;
+            if (duration <= 0) duration = 300;
+            
+            timeRemaining = duration;
+            updateDisplay();
+        }
+
+        function setPreset(mins) {
+            minutesInput.value = mins;
+            secondsInput.value = 0;
+            resetTimer();
+        }
+
+        // Live input updates
+        minutesInput.addEventListener('change', resetTimer);
+        secondsInput.addEventListener('change', resetTimer);
+
+        // Init display
+        updateDisplay();
+    </script>
+</body>
+</html>

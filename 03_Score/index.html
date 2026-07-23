@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>課堂小組計分板</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-start: #0f172a;
+            --bg-end: #1e1b4b;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-color: #f8fafc;
+            --accent: #a855f7;
+            --highest-color: #ef4444;
+            --highest-glow: rgba(239, 68, 68, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #f472b6 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        .scoreboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            width: 100%;
+            max-width: 1100px;
+            z-index: 10;
+        }
+
+        .group-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Subtle glowing background representing the group ID color */
+        .group-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: var(--group-theme);
+        }
+
+        .group-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Crown indicator for leader */
+        .leader-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            transform: rotate(15deg);
+            opacity: 0;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 0 6px rgba(253, 224, 71, 0.5));
+        }
+
+        .group-card.leader .leader-badge {
+            opacity: 1;
+            animation: crown-float 1s infinite alternate;
+        }
+
+        @keyframes crown-float {
+            0% { transform: rotate(10deg) translateY(0); }
+            100% { transform: rotate(20deg) translateY(-4px); }
+        }
+
+        /* Leader highlight styling */
+        .group-card.leader {
+            border-color: var(--highest-color);
+            box-shadow: 0 15px 35px var(--highest-glow);
+        }
+
+        .group-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #e2e8f0;
+            border: none;
+            background: transparent;
+            text-align: center;
+            width: 90%;
+            outline: none;
+            padding: 4px;
+            border-bottom: 1px dashed rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .group-name:focus {
+            border-bottom-style: solid;
+            border-bottom-color: var(--group-theme);
+            color: #fff;
+        }
+
+        .score-container {
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .score-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 72px;
+            font-weight: 800;
+            color: var(--text-color);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: inline-block;
+        }
+
+        /* Highlight score for the leader */
+        .group-card.leader .score-value {
+            color: var(--highest-color);
+            text-shadow: 0 0 15px var(--highest-glow);
+            transform: scale(1.1);
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .score-btn {
+            border: none;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+
+        .btn-plus {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-plus:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-minus {
+            background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+        }
+
+        .btn-minus:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 6px 16px rgba(244, 63, 94, 0.4);
+        }
+
+        .global-controls {
+            margin-top: 40px;
+            z-index: 10;
+        }
+
+        .btn-reset {
+            font-family: 'Outfit', sans-serif;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            padding: 12px 24px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-reset:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--highest-color);
+            border-color: rgba(239, 68, 68, 0.2);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><span>🎤</span>課堂小組計分板</h1>
+        <div class="subtitle">點擊小組名稱可直接修改，比分最高者將自動顯示皇冠 👑</div>
+    </header>
+
+    <div class="scoreboard-grid" id="scoreboardGrid">
+        <!-- Cards will be populated dynamically -->
+    </div>
+
+    <div class="global-controls">
+        <button class="btn-reset" onclick="resetAllScores()">🔄 重置所有組別分數</button>
+    </div>
+
+    <script>
+        // Preset theme colors for the 6 groups
+        const colors = [
+            '#ef4444', // Red
+            '#3b82f6', // Blue
+            '#10b981', // Green
+            '#f59e0b', // Amber/Yellow
+            '#ec4899', // Pink
+            '#8b5cf6'  // Purple
+        ];
+
+        let groups = [
+            { id: 1, name: '第一組', score: 0 },
+            { id: 2, name: '第二組', score: 0 },
+            { id: 3, name: '第三組', score: 0 },
+            { id: 4, name: '第四組', score: 0 },
+            { id: 5, name: '第五組', score: 0 },
+            { id: 6, name: '第六組', score: 0 }
+        ];
+
+        // Synthesizer beep triggers
+        let audioCtx = null;
+        function playChime(isUp) {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.type = 'triangle';
+                const now = audioCtx.currentTime;
+                
+                if (isUp) {
+                    // Nice pentatonic double chime
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else {
+                    // Lower warning chime
+                    osc.frequency.setValueAtTime(329.63, now); // E4
+                    osc.frequency.setValueAtTime(261.63, now + 0.08); // C4
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                }
+            } catch (e) {
+                console.error("Audio error", e);
+            }
+        }
+
+        const scoreboardGrid = document.getElementById('scoreboardGrid');
+
+        function updateScoreboard() {
+            // Find highest score
+            const scores = groups.map(g => g.score);
+            const maxScore = Math.max(...scores);
+
+            // Clear first or just sync HTML
+            scoreboardGrid.innerHTML = '';
+
+            groups.forEach((group, index) => {
+                const isLeader = group.score === maxScore && maxScore > 0;
+                
+                const card = document.createElement('div');
+                card.className = `group-card ${isLeader ? 'leader' : ''}`;
+                card.style.setProperty('--group-theme', colors[index]);
+                
+                card.innerHTML = `
+                    <span class="leader-badge">👑</span>
+                    <input type="text" class="group-name" value="${group.name}" onchange="changeGroupName(${group.id}, this.value)" style="--group-theme: ${colors[index]}">
+                    <div class="score-container">
+                        <div class="score-value">${group.score}</div>
+                    </div>
+                    <div class="btn-container">
+                        <button class="score-btn btn-minus" onclick="adjustScore(${group.id}, -1)">-</button>
+                        <button class="score-btn btn-plus" onclick="adjustScore(${group.id}, 1)">+</button>
+                    </div>
+                `;
+                
+                scoreboardGrid.appendChild(card);
+            });
+        }
+
+        function adjustScore(id, amount) {
+            const group = groups.find(g => g.id === id);
+            if (group) {
+                group.score += amount;
+                playChime(amount > 0);
+                updateScoreboard();
+            }
+        }
+
+        function changeGroupName(id, newName) {
+            const group = groups.find(g => g.id === id);
+            if (group) {
+                group.name = newName.trim() || `第 ${id} 組`;
+            }
+        }
+
+        function resetAllScores() {
+            if (confirm("確定要重置所有組別的分數嗎？")) {
+                groups.forEach(g => g.score = 0);
+                updateScoreboard();
+            }
+        }
+
+        // Initialize grid
+        updateScoreboard();
+    </script>
+</body>
+</html>

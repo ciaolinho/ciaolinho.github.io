@@ -1,0 +1,4 @@
+node_modules/
+.netlify/
+deploy_automation.js
+*.log

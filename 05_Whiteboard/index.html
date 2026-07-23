@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>簡易隨堂電子白板</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f1f5f9;
+            --whiteboard-bg: #ffffff;
+            --border-color: #94a3b8;
+            --tray-color: #e2e8f0;
+            --tray-border: #cbd5e1;
+            --accent: #2563eb;
+            --accent-hover: #1d4ed8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        header {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Whiteboard border representing an aluminum frame with plastic corner pieces */
+        .whiteboard-frame {
+            width: 100%;
+            max-width: 1200px;
+            flex-grow: 1;
+            background: #cbd5e1; /* Aluminum metallic border color */
+            padding: 12px;
+            border-radius: 16px;
+            box-shadow: 
+                0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+                0 8px 10px -6px rgba(0, 0, 0, 0.1),
+                inset 0 1px 3px rgba(255, 255, 255, 0.5);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            height: calc(100vh - 140px);
+        }
+
+        .toolbar {
+            background: var(--tray-color);
+            border: 1px solid var(--tray-border);
+            border-bottom: 2px solid #cbd5e1;
+            padding: 10px 16px;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .tool-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tool-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            margin-right: 4px;
+        }
+
+        .btn-tool {
+            background: #fff;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-tool:hover:not(:disabled) {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        .btn-tool.active {
+            background: #eff6ff;
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+        }
+
+        /* Custom color dot selectors */
+        .color-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .color-dot:hover {
+            transform: scale(1.1);
+        }
+
+        .color-dot.active {
+            border-color: #fff;
+            box-shadow: 0 0 0 2px #475569;
+        }
+
+        .color-black { background-color: #1e293b; }
+        .color-red { background-color: #ef4444; }
+        .color-blue { background-color: #3b82f6; }
+
+        /* Range slider polish */
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="range"] {
+            width: 80px;
+            height: 6px;
+            background: #cbd5e1;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* Canvas paper guides background options */
+        .canvas-container {
+            flex-grow: 1;
+            background-color: var(--whiteboard-bg);
+            position: relative;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Grid guideline style */
+        .canvas-container.grid-lines {
+            background-image: 
+                linear-gradient(rgba(226, 232, 240, 0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(226, 232, 240, 0.5) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Notebook guide lines style */
+        .canvas-container.lined-paper {
+            background-image: linear-gradient(rgba(148, 163, 184, 0.25) 1px, transparent 1px);
+            background-size: 100% 30px;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            touch-action: none; /* Crucial for stylus drawing */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><span>🖌️</span>簡易隨堂電子白板</h1>
+    </header>
+
+    <div class="whiteboard-frame">
+        <div class="toolbar">
+            <!-- Left Tool Group -->
+            <div class="tool-group">
+                <span class="tool-label">🎨 畫筆：</span>
+                <div class="color-dot color-black active" id="dotBlack" onclick="setPenColor('#1e293b', 'dotBlack')"></div>
+                <div class="color-dot color-red" id="dotRed" onclick="setPenColor('#ef4444', 'dotRed')"></div>
+                <div class="color-dot color-blue" id="dotBlue" onclick="setPenColor('#3b82f6', 'dotBlue')"></div>
+
+                <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 8px;"></div>
+
+                <button class="btn-tool" id="eraserBtn" onclick="activateEraser()">🧽 橡皮擦</button>
+
+                <div class="slider-container">
+                    <span class="tool-label" style="margin-left: 8px;">粗細：</span>
+                    <input type="range" id="sizeRange" min="2" max="30" value="4" oninput="updateBrushSize(this.value)">
+                    <span class="tool-label" id="sizeVal" style="width: 18px;">4</span>
+                </div>
+            </div>
+
+            <!-- Right Tool Group -->
+            <div class="tool-group">
+                <button class="btn-tool" id="undoBtn" onclick="undo()" disabled>↩ 復原</button>
+                <button class="btn-tool" id="redoBtn" onclick="redo()" disabled>↪ 重做</button>
+                
+                <div style="width: 1px; height: 20px; background: #cbd5e1; margin: 0 8px;"></div>
+
+                <span class="tool-label">📄 背景：</span>
+                <select id="bgSelect" onchange="changeBg(this.value)" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px; outline: none; font-size: 13px; font-weight: 500;">
+                    <option value="blank">空白白板</option>
+                    <option value="grid">方格網線</option>
+                    <option value="lined">橫欄筆記</option>
+                </select>
+
+                <button class="btn-tool" onclick="clearCanvas()" style="background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.2); color: #ef4444;">🗑️ 清除畫布</button>
+            </div>
+        </div>
+
+        <div class="canvas-container" id="canvasContainer">
+            <canvas id="paintCanvas"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('paintCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvasContainer');
+        const eraserBtn = document.getElementById('eraserBtn');
+        const sizeVal = document.getElementById('sizeVal');
+        const undoBtn = document.getElementById('undoBtn');
+        const redoBtn = document.getElementById('redoBtn');
+
+        let isDrawing = false;
+        let penColor = '#1e293b';
+        let brushSize = 4;
+        let isEraser = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        // Undo & Redo snap state stack histories
+        let undoStack = [];
+        let redoStack = [];
+        const maxHistory = 20;
+
+        function resizeCanvas() {
+            // Backup current canvas content
+            const tempImage = canvas.toDataURL();
+            
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            
+            // Draw baseline settings
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            // Restore content after resize
+            const img = new Image();
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = tempImage;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        // Setup initial canvas dimensions
+        setTimeout(resizeCanvas, 100);
+
+        // Drawing events supporting Mouse and Touch (Stylus)
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getPos(e);
+            lastX = pos.x;
+            lastY = pos.y;
+            
+            // Save state for undo
+            saveState();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            e.preventDefault();
+            
+            const pos = getPos(e);
+            
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            
+            if (isEraser) {
+                ctx.strokeStyle = '#ffffff'; // Whiteboard background color
+                ctx.lineWidth = brushSize * 3; // Make eraser larger for usability
+            } else {
+                ctx.strokeStyle = penColor;
+                ctx.lineWidth = brushSize;
+            }
+            
+            ctx.stroke();
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        // Canvas events listeners
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
+
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        // Toolbar functions
+        function setPenColor(color, dotId) {
+            isEraser = false;
+            penColor = color;
+            eraserBtn.classList.remove('active');
+            
+            // Toggle active visual indicator on color circles
+            document.querySelectorAll('.color-dot').forEach(dot => {
+                dot.classList.remove('active');
+            });
+            document.getElementById(dotId).classList.add('active');
+        }
+
+        function activateEraser() {
+            isEraser = true;
+            document.querySelectorAll('.color-dot').forEach(dot => {
+                dot.classList.remove('active');
+            });
+            eraserBtn.classList.add('active');
+        }
+
+        function updateBrushSize(val) {
+            brushSize = val;
+            sizeVal.textContent = val;
+        }
+
+        function clearCanvas() {
+            if (confirm("確定要清除所有繪圖內容嗎？")) {
+                saveState();
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                redoStack = [];
+                updateUndoRedoButtons();
+            }
+        }
+
+        function changeBg(type) {
+            container.className = 'canvas-container'; // reset
+            if (type === 'grid') {
+                container.classList.add('grid-lines');
+            } else if (type === 'lined') {
+                container.classList.add('lined-paper');
+            }
+        }
+
+        // Undo & Redo snap logics
+        function saveState() {
+            if (undoStack.length >= maxHistory) {
+                undoStack.shift();
+            }
+            undoStack.push(canvas.toDataURL());
+            redoStack = []; // Clear redo stack on new action
+            updateUndoRedoButtons();
+        }
+
+        function undo() {
+            if (undoStack.length > 0) {
+                redoStack.push(canvas.toDataURL());
+                const previousState = undoStack.pop();
+                
+                const img = new Image();
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                };
+                img.src = previousState;
+                updateUndoRedoButtons();
+            }
+        }
+
+        function redo() {
+            if (redoStack.length > 0) {
+                undoStack.push(canvas.toDataURL());
+                const nextState = redoStack.pop();
+                
+                const img = new Image();
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                };
+                img.src = nextState;
+                updateUndoRedoButtons();
+            }
+        }
+
+        function updateUndoRedoButtons() {
+            undoBtn.disabled = undoStack.length === 0;
+            redoBtn.disabled = redoStack.length === 0;
+        }
+    </script>
+</body>
+</html>

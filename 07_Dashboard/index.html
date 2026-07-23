@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教學功能卡牌傳送門 - Teaching Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            
+            /* Custom neon glows for each card category to create premium aesthetics */
+            --color-card1: #f472b6; /* pink */
+            --color-card2: #38bdf8; /* sky */
+            --color-card3: #a855f7; /* purple */
+            --color-card4: #fb923c; /* orange */
+            --color-card5: #10b981; /* emerald */
+            --color-card6: #6366f1; /* indigo */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Tech decorative background blobs */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: 0;
+            opacity: 0.15;
+            pointer-events: none;
+            animation: blob-float 15s infinite alternate;
+        }
+
+        .blob-1 {
+            width: 500px;
+            height: 500px;
+            background: #4f46e5;
+            top: -100px;
+            left: -100px;
+        }
+
+        .blob-2 {
+            width: 400px;
+            height: 400px;
+            background: #ec4899;
+            bottom: -50px;
+            right: -50px;
+            animation-delay: -5s;
+        }
+
+        @keyframes blob-float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(60px, 40px) scale(1.1); }
+        }
+
+        .dashboard-container {
+            width: 100%;
+            max-width: 1100px;
+            z-index: 10;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 38px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #f3f4f6 30%, #9ca3af 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .teacher-badge {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #f472b6;
+            font-weight: 600;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 28px;
+            width: 100%;
+        }
+
+        .card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 36px 30px;
+            height: 100%;
+            min-height: 220px;
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Glowing indicator on hover */
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--glow-color);
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--glow-color);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.6),
+                0 0 25px var(--glow-shadow);
+        }
+
+        .card:hover::after {
+            opacity: 1;
+        }
+
+        .card-top {
+            margin-bottom: 24px;
+        }
+
+        .icon-box {
+            width: 52px;
+            height: 52px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 26px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover .icon-box {
+            background: var(--glow-shadow);
+            border-color: var(--glow-color);
+            transform: scale(1.1);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .card-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .card-footer {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--glow-color);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.8;
+            transition: gap 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .card:hover .card-footer {
+            gap: 8px;
+            opacity: 1;
+        }
+
+        /* Grid card assignments */
+        .card-1 { --glow-color: var(--color-card1); --glow-shadow: rgba(244, 114, 182, 0.15); }
+        .card-2 { --glow-color: var(--color-card2); --glow-shadow: rgba(56, 189, 248, 0.15); }
+        .card-3 { --glow-color: var(--color-card3); --glow-shadow: rgba(168, 85, 247, 0.15); }
+        .card-4 { --glow-color: var(--color-card4); --glow-shadow: rgba(251, 146, 96, 0.15); }
+        .card-5 { --glow-color: var(--color-card5); --glow-shadow: rgba(16, 185, 129, 0.15); }
+        .card-6 { --glow-color: var(--color-card6); --glow-shadow: rgba(99, 102, 241, 0.15); }
+    </style>
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <div class="dashboard-container">
+        <header>
+            <h1>教學功能卡牌傳送門</h1>
+            <div class="subtitle">
+                <span class="teacher-badge">何巧琳 老師</span>
+                <span>專屬智慧課堂工具箱</span>
+            </div>
+        </header>
+
+        <div class="grid-container">
+            <!-- Card 1: Teacher Card -->
+            <a href="../01_Card/index.html" target="_blank" class="card-link">
+                <div class="card card-1">
+                    <div class="card-top">
+                        <div class="icon-box">👩‍⚕️</div>
+                        <h2 class="card-title">數位教師名片</h2>
+                        <p class="card-description">何巧琳 老師的簡介與授課科目說明，帶您深入健康護理專業領域。</p>
+                    </div>
+                    <div class="card-footer">開啟傳送門 &rarr;</div>
+                </div>
+            </a>
+
+            <!-- Card 2: Timer -->
+            <a href="../02_Timer/index.html" target="_blank" class="card-link">
+                <div class="card card-2">
+                    <div class="card-top">
+                        <div class="icon-box">⏳</div>
+                        <h2 class="card-title">課堂倒數計時器</h2>
+                        <p class="card-description">課堂分組討論與演練計時，倒數完畢自動閃爍並播放語音聲響提示。</p>
+                    </div>
+                    <div class="card-footer">開啟傳送門 &rarr;</div>
+                </div>
+            </a>
+
+            <!-- Card 3: Scoreboard -->
+            <a href="../03_Score/index.html" target="_blank" class="card-link">
+                <div class="card card-3">
+                    <div class="card-top">
+                        <div class="icon-box">👑</div>
+                        <h2 class="card-title">小組計分板</h2>
+                        <p class="card-description">分組搶答與課堂互動計分板，自動追蹤領先組別並套用皇冠高亮效果。</p>
+                    </div>
+                    <div class="card-footer">開啟傳送門 &rarr;</div>
+                </div>
+            </a>
+
+            <!-- Card 4: Lottery -->
+            <a href="../04_Lottery/index.html" target="_blank" class="card-link">
+                <div class="card card-4">
+                    <div class="card-top">
+                        <div class="icon-box">🎡</div>
+                        <h2 class="card-title">隨機點名抽籤</h2>
+                        <p class="card-description">隨機點名抽籤工具，支援名單編輯、跑馬燈滾動特效與粒子碎紙慶祝效果。</p>
+                    </div>
+                    <div class="card-footer">開啟傳送門 &rarr;</div>
+                </div>
+            </a>
+
+            <!-- Card 5: Whiteboard -->
+            <a href="../05_Whiteboard/index.html" target="_blank" class="card-link">
+                <div class="card card-5">
+                    <div class="card-top">
+                        <div class="icon-box">🖌</div>
+                        <h2 class="card-title">隨堂電子白板</h2>
+                        <p class="card-description">手寫板與塗鴉教學白板，支援多色筆觸、筆跡粗細、格線背景與歷史步驟復原。</p>
+                    </div>
+                    <div class="card-footer">開啟傳送門 &rarr;</div>
+                </div>
+            </a>
+
+            <!-- Card 6: Flashcard -->
+            <a href="../06_Flashcard/index.html" target="_blank" class="card-link">
+                <div class="card card-6">
+                    <div class="card-top">
+                        <div class="icon-box">🎴</div>
+                        <h2 class="card-title">知識閃卡工具</h2>
+                        <p class="card-description">3D 立體旋轉單字卡片與知識點自測卡，幫助學生加深概念與課堂複習。</p>
+                    </div>
+                    <div class="card-footer">開啟傳送門 &rarr;</div>
+                </div>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

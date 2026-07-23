@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隨機抽籤點名工具</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-start: #fff7ed;
+            --bg-end: #ffedd5;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --border-color: rgba(251, 146, 60, 0.2);
+            --text-color: #431407;
+            --accent: #f97316;
+            --accent-hover: #ea580c;
+            --accent-glow: rgba(249, 115, 22, 0.35);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Confetti canvas overlay */
+        #confettiCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 
+                0 20px 40px rgba(120, 53, 4, 0.08),
+                0 1px 3px rgba(0,0,0,0.02);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #7c2d12;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-lottery {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #fb923c 0%, var(--accent) 100%);
+            color: white;
+            border: none;
+            padding: 16px 36px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 24px var(--accent-glow);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 100%;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        .btn-lottery:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px var(--accent-glow);
+        }
+
+        .btn-lottery:active:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .btn-lottery:disabled {
+            background: #cbd5e1;
+            box-shadow: none;
+            cursor: not-allowed;
+            color: #64748b;
+        }
+
+        .display-card {
+            background: #fff;
+            border: 2px solid rgba(251, 146, 60, 0.15);
+            border-radius: 24px;
+            min-height: 160px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            box-shadow: inset 0 2px 8px rgba(120, 53, 4, 0.03);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .winner-display {
+            font-size: 40px;
+            font-weight: 700;
+            color: var(--accent);
+            transition: all 0.1s ease;
+        }
+
+        /* Bounce celebration animation class */
+        .winner-display.celebrate {
+            animation: bounce-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.5) infinite alternate;
+            color: #ea580c;
+            text-shadow: 0 4px 12px rgba(234, 88, 12, 0.2);
+        }
+
+        @keyframes bounce-pop {
+            0% { transform: scale(0.9); }
+            100% { transform: scale(1.15); }
+        }
+
+        .setup-section {
+            text-align: left;
+            margin-top: 20px;
+            border-top: 1px solid rgba(251, 146, 60, 0.15);
+            padding-top: 20px;
+        }
+
+        .label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #7c2d12;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .count-badge {
+            background: rgba(249, 115, 22, 0.1);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        textarea {
+            width: 100%;
+            height: 90px;
+            border: 1px solid rgba(251, 146, 60, 0.2);
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text-color);
+            resize: none;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            border-color: var(--accent);
+            background: #fff;
+            box-shadow: 0 0 10px rgba(249, 115, 22, 0.08);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="confettiCanvas"></canvas>
+
+    <div class="container">
+        <h1><span>🎡</span>隨機抽籤點名</h1>
+
+        <button class="btn-lottery" id="rollBtn" onclick="rollWinner()">🎯 抽出幸運兒</button>
+
+        <div class="display-card">
+            <div class="winner-display" id="winnerDisplay">等待抽籤...</div>
+        </div>
+
+        <div class="setup-section">
+            <div class="label">
+                <span>📋 名單設定 (以逗號或換行分隔)</span>
+                <span class="count-badge" id="nameCount">0 人</span>
+            </div>
+            <textarea id="nameList" placeholder="請貼上或輸入名單，例如：張小明, 林大華..." oninput="updateCount()">張小明, 林大華, 陳美玲, 王小川, 李佳琪, 黃志勇</textarea>
+        </div>
+    </div>
+
+    <script>
+        const winnerDisplay = document.getElementById('winnerDisplay');
+        const rollBtn = document.getElementById('rollBtn');
+        const nameListInput = document.getElementById('nameList');
+        const nameCountDisplay = document.getElementById('nameCount');
+        const canvas = document.getElementById('confettiCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Confetti Particle Engine
+        let confetti = [];
+        let canvasActive = false;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height - canvas.height;
+                this.size = Math.random() * 8 + 6;
+                this.color = `hsl(${Math.random() * 360}, 90%, 65%)`;
+                this.speedX = Math.random() * 3 - 1.5;
+                this.speedY = Math.random() * 4 + 4;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = Math.random() * 4 - 2;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.rotation += this.rotationSpeed;
+                if (this.y > canvas.height) {
+                    this.y = -20;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate((this.rotation * Math.PI) / 180);
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        function initConfetti() {
+            confetti = [];
+            for (let i = 0; i < 100; i++) {
+                confetti.push(new Particle());
+            }
+        }
+
+        function animateConfetti() {
+            if (!canvasActive) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            confetti.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateConfetti);
+        }
+
+        function startCelebration() {
+            canvasActive = true;
+            initConfetti();
+            animateConfetti();
+            // Stop confetti after 5 seconds
+            setTimeout(() => {
+                canvasActive = false;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }, 5000);
+        }
+
+        // Web Audio synthesizer rolling click sound & victory sound
+        let audioCtx = null;
+        function playClickSound() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = 600;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.05);
+            } catch (e) {}
+        }
+
+        function playVictorySound() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                const now = audioCtx.currentTime;
+                const playNote = (freq, start, duration) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.frequency.setValueAtTime(freq, now + start);
+                    osc.type = 'triangle';
+                    gain.gain.setValueAtTime(0.2, now + start);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + start + duration);
+                    osc.start(now + start);
+                    osc.stop(now + start + duration);
+                };
+                playNote(523.25, 0, 0.15); // C5
+                playNote(659.25, 0.15, 0.15); // E5
+                playNote(783.99, 0.3, 0.15); // G5
+                playNote(1046.50, 0.45, 0.4); // C6
+            } catch (e) {}
+        }
+
+        // Name list parsing
+        function getNames() {
+            const rawText = nameListInput.value;
+            // Split by comma, semi-colon, or newlines
+            return rawText.split(/[,\n;，；]+/)
+                .map(n => n.trim())
+                .filter(n => n.length > 0);
+        }
+
+        function updateCount() {
+            const names = getNames();
+            nameCountDisplay.textContent = `${names.length} 人`;
+        }
+
+        function rollWinner() {
+            const names = getNames();
+            if (names.length === 0) {
+                alert("請先輸入名單資料！");
+                return;
+            }
+
+            // Stop any active canvas & reset classes
+            canvasActive = false;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            winnerDisplay.classList.remove('celebrate');
+            rollBtn.disabled = true;
+
+            // Rolling Slot-machine animation
+            let rollCount = 0;
+            const maxRolls = 15;
+            let currentDelay = 50; // milliseconds
+
+            function runRoll() {
+                const randomIndex = Math.floor(Math.random() * names.length);
+                winnerDisplay.textContent = names[randomIndex];
+                playClickSound();
+
+                rollCount++;
+                if (rollCount < maxRolls) {
+                    // Gradually slow down
+                    currentDelay += 20;
+                    setTimeout(runRoll, currentDelay);
+                } else {
+                    // Final Selection!
+                    const finalIndex = Math.floor(Math.random() * names.length);
+                    winnerDisplay.textContent = names[finalIndex];
+                    
+                    winnerDisplay.classList.add('celebrate');
+                    playVictorySound();
+                    startCelebration();
+                    rollBtn.disabled = false;
+                }
+            }
+
+            runRoll();
+        }
+
+        // Init counter
+        updateCount();
+    </script>
+</body>
+</html>
