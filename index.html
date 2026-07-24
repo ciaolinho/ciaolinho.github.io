@@ -10,6 +10,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Ma+Shan+Zheng&family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;700;900&family=Outfit:wght@400;600;700;800;900&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="全能教學儀表板">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" content="#ff477e">
     <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
@@ -58,6 +65,9 @@
             </button>
             <button class="tab-btn" onclick="switchView('all', this)">
                 <i class="fa-solid fa-table-cells-large"></i> 全視角總覽
+            </button>
+            <button class="tab-btn btn-pwa-install" onclick="openPwaModal()" style="border: 1.5px dashed var(--coral-primary); color: var(--coral-primary); margin-left: auto;">
+                <i class="fa-solid fa-mobile-screen-button"></i> 手機版 App
             </button>
         </nav>
     </header>
@@ -509,6 +519,44 @@
         </section>
 
     </main>
+
+    <!-- PWA Installation Guide Modal -->
+    <div id="pwaModal" class="pwa-modal-overlay" onclick="closePwaModal()">
+        <div class="pwa-modal-content" onclick="event.stopPropagation()">
+            <button class="pwa-close-btn" onclick="closePwaModal()" title="關閉">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h2 class="pwa-title">
+                <i class="fa-solid fa-mobile-screen-button"></i> 安裝手機版 App (PWA)
+            </h2>
+            <div class="pwa-qr-box">
+                <img id="pwaQrCode" src="" alt="請使用手機掃描" width="200" height="200">
+            </div>
+            <div class="pwa-steps">
+                <div class="pwa-step-item">
+                    <div class="pwa-step-num">1</div>
+                    <div class="pwa-step-text">請用手機相機掃描上方 QR Code 開啟網頁。</div>
+                </div>
+                <div class="pwa-step-item">
+                    <div class="pwa-step-num">2</div>
+                    <div class="pwa-step-text">
+                        <strong>iOS (Safari 瀏覽器)</strong>：<br>
+                        點擊下方分享圖示 <i class="fa-solid fa-share-from-square" style="color: #ff477e;"></i>，選擇<strong>「加入主畫面」</strong>。
+                    </div>
+                </div>
+                <div class="pwa-step-item">
+                    <div class="pwa-step-num">3</div>
+                    <div class="pwa-step-text">
+                        <strong>Android (Chrome 瀏覽器)</strong>：<br>
+                        點擊右上角 <i class="fa-solid fa-ellipsis-vertical"></i>，選擇<strong>「安裝應用程式」</strong>或<strong>「加入主畫面」</strong>。
+                    </div>
+                </div>
+            </div>
+            <p class="pwa-footer-text">
+                🎉 安裝後即可像原生 App 一樣，享有獨立全螢幕體驗並支援離線開啟！
+            </p>
+        </div>
+    </div>
 
     <script src="script.js?v=3"></script>
 </body>

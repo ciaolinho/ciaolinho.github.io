@@ -459,9 +459,88 @@ body {
     .canvas-wrapper { height: 360px; }
     .card-scene { height: 290px; }
     .card-word { font-size: 3rem; }
+    
+    /* Optimize view-tabs for horizontal scrolling on mobile */
+    .app-header {
+        padding: 1rem 1rem 0.5rem;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+    .logo {
+        align-self: center;
+    }
+    .view-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
+        padding: 4px;
+        border-radius: 14px;
+        scrollbar-width: none; /* Hide scrollbar for Firefox */
+    }
+    .view-tabs::-webkit-scrollbar {
+        display: none; /* Hide scrollbar for Chrome/Safari */
+    }
+    .tab-btn {
+        flex-shrink: 0;
+        padding: 0.4rem 0.75rem;
+        font-size: 0.78rem;
+    }
+    .btn-pwa-install {
+        margin-left: 0 !important; /* Reset margin on mobile */
+    }
 }
 
 @media (max-width: 640px) {
     .portal-grid { grid-template-columns: 1fr; }
     .portal-title { font-size: 2.1rem; }
+    .steam-container, .interactive-container {
+        height: 520px !important;
+    }
 }
+
+/* Ensure Canvas doesn't bounce/scroll on touch drag */
+#whiteboardCanvas {
+    touch-action: none;
+}
+
+/* =========================================================
+   PWA INSTALLATION MODAL STYLES
+   ========================================================= */
+.pwa-modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(74, 21, 37, 0.4); backdrop-filter: blur(8px);
+    z-index: 9999; display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: all 0.3s ease;
+}
+.pwa-modal-overlay.active {
+    opacity: 1; pointer-events: auto;
+}
+.pwa-modal-content {
+    background: #ffffff; border-radius: 28px; padding: 2rem;
+    max-width: 480px; width: 90%; box-shadow: 0 24px 60px rgba(255, 71, 126, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.95); position: relative;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    transform: translateY(20px); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.pwa-modal-overlay.active .pwa-modal-content {
+    transform: translateY(0);
+}
+.pwa-close-btn {
+    position: absolute; top: 1.2rem; right: 1.2rem; background: #fff0f3;
+    border: none; width: 32px; height: 32px; border-radius: 50%;
+    color: var(--coral-primary); font-size: 1rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
+}
+.pwa-close-btn:hover {
+    background: var(--coral-primary); color: #ffffff;
+}
+.pwa-title { font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px; }
+.pwa-qr-box { background: #fdf2f4; border: 2px dashed #ffb5a7; padding: 0.85rem; border-radius: 20px; margin-bottom: 1.25rem; }
+.pwa-qr-box img { display: block; border-radius: 12px; }
+.pwa-steps { text-align: left; width: 100%; margin-bottom: 1.25rem; }
+.pwa-step-item { margin-bottom: 0.8rem; font-size: 0.88rem; line-height: 1.5; color: var(--text-primary); display: flex; gap: 10px; }
+.pwa-step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--coral-primary); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 800; flex-shrink: 0; }
+.pwa-step-text { flex: 1; }
+.pwa-footer-text { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; }

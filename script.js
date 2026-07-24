@@ -660,3 +660,42 @@ updateRosterCount();
 updateFlashcard();
 window.addEventListener('load', resizeCanvas);
 setTimeout(resizeCanvas, 150);
+
+// =========================================================
+// 6. PWA SERVICE WORKER & INSTALLATION MODAL LOGIC
+// =========================================================
+
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker registered successfully with scope:', reg.scope))
+            .catch(err => console.error('Service Worker registration failed:', err));
+    });
+}
+
+// PWA Modal Handlers
+function openPwaModal() {
+    const modal = document.getElementById('pwaModal');
+    if (modal) {
+        modal.classList.add('active');
+        
+        // Dynamically set the QR Code to the current URL
+        const qrImg = document.getElementById('pwaQrCode');
+        if (qrImg) {
+            let currentUrl = window.location.href;
+            // If running locally, let's point it to the GitHub pages URL directly for easier phone scanning
+            if (currentUrl.startsWith('file://')) {
+                currentUrl = 'https://ciaolinho.github.io/';
+            }
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(currentUrl)}`;
+        }
+    }
+}
+
+function closePwaModal() {
+    const modal = document.getElementById('pwaModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
+}
